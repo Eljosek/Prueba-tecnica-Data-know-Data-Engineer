@@ -1,11 +1,19 @@
+![DataKnow Logo](https://via.placeholder.com/150x150?text=DataKnow)
+
 # 🛒 Prueba Técnica – Ingeniero de Datos
 ### RetailMax · Escenario B – Retail y Comercio Electrónico
 
 > **Candidato:** Jose Miguel Herrera Gutierrez 
 > **Correo:** Josemiguelherreragutierrez7@gmail.com
-> **Fecha:** Abril 7, 2026  
-> **GitHub:**https://github.com/Eljosek/Prueba-Tecnica-Data-know-Data-Engineer
-> **Linkedin** https://www.linkedin.com/in/joseherreradev/
+> **Fecha:** Abril 8, 2026  
+> **GitHub:** https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer
+> **LinkedIn:** https://www.linkedin.com/in/joseherreradev/
+
+---
+
+## 🤝 Saludo Cordial
+
+Agradezco sinceramente la oportunidad de participar en esta prueba técnica de **DataKnow**. Ha sido un verdadero honor trabajar en este desafío y demostrar mis habilidades como Ingeniero de Datos. Espero que este proyecto refleje mi dedicación, conocimiento técnico y pasión por la ingeniería de datos moderna. Saludos cordiales a quienes revisen este trabajo.
 
 ## 🎯 Escenario Elegido: B – Retail y Comercio Electrónico
 
@@ -35,4 +43,12 @@ Se seleccionó Azure porque:
 
 **Estado:** En desarrollo (Fase 1)
 
-*Última actualización: 7 de abril de 2026*
+*Última actualización: 8 de abril de 2026*
+
+---
+
+## 👋 Cierre
+
+Gracias nuevamente por revisar este proyecto. Quedo atenta a cualquier pregunta, sugerencia o feedback. ¡Es un honor trabajar con **DataKnow**!
+
+**Jose Miguel Herrera Gutierrez** 📊✨
