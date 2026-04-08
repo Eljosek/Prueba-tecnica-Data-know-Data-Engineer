@@ -1,0 +1,69 @@
+# Configuración de Generación de Datos Sintéticos
+# Escenario B: Retail & E-commerce (RetailMax)
+# Fecha: Abril 8, 2026
+
+# Semilla para reproducibilidad
+seed: 42
+
+# Rango de fechas para registros transaccionales
+date_range:
+  start: "2023-01-01"
+  end: "2024-12-31"
+
+# Volúmenes de cada tabla
+volumes:
+  MSTR_PROVEEDORES: 800
+  MSTR_TIENDAS: 150
+  MSTR_ARTICULOS: 5000
+  CRM_MIEMBROS: 50000
+  TRANS_VENTAS: 1000000
+  INV_STOCK_DIARIO: 750000
+  POST_DEVOLUCIONES: 50000
+
+# Configuración de anomalías intencionales
+anomalies:
+  null_rate: 0.05                          # 5% de valores nulos
+  duplicate_rate: 0.001                    # 0.1% registros duplicados exactos
+  out_of_range_rate: 0.001                 # 0.1% valores fuera de rango
+  referential_integrity_violation_rate: 0.005  # 0.5% FK inválidas
+
+# Formatos de salida
+output_formats:
+  - csv
+  - parquet
+
+# Ruta de salida
+output_path: data-generation/output
+
+# Configuración de geografía
+paises:
+  - Colombia
+  - Mexico
+  - Peru
+  - Chile
+  - Argentina
+
+# Configuración de categorías
+categorias_nivel1:
+  - Alimentos
+  - Bebidas
+  - Cuidado Personal
+  - Hogar
+  - Electrónica
+  - Ropa
+
+# Configuración de ciudades
+ciudades:
+  - Bogotá
+  - Medellín
+  - Cali
+  - Barranquilla
+  - Cartagena
+
+# Configuración de database (para fase de carga - actualizar con valores reales)
+database:
+  server: "dataknow.database.windows.net"
+  database: "RetailMax"
+  username: "${SQLSERVER_USER}"  # Usar variables de entorno
+  password: "${SQLSERVER_PASSWORD}"
+  port: 1433

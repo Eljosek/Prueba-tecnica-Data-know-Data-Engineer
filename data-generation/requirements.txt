@@ -1,0 +1,9 @@
+pandas==2.1.4
+numpy==1.26.3
+Faker==22.0.0
+PyYAML==6.0.1
+pyarrow==14.0.1
+sqlalchemy==2.0.23
+azure-storage-blob==12.17.0
+azure-identity==1.14.0
+python-dateutil==2.8.2
