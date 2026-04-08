@@ -6,10 +6,10 @@ Registro de todos los cambios significativos en este proyecto.
 
 ### Added - 2026-04-07
 
-- ✅ Estructura inicial del repositorio
-- ✅ .gitignore configurado para Python, Terraform y Azure
-- ✅ README con justificación de escenario y plataforma
-- ✅ CHANGELOG inicializado
+- Estructura inicial del repositorio
+- .gitignore configurado para Python, Terraform y Azure
+- README con justificación de escenario y plataforma
+- CHANGELOG inicializado
 
 ### En Progreso
 

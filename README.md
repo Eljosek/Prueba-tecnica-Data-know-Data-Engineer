@@ -1,6 +1,6 @@
-![DataKnow Logo](https://via.placeholder.com/150x150?text=DataKnow)
+![DataKnow Logo](./images/dataknow-logo.png)
 
-# 🛒 Prueba Técnica – Ingeniero de Datos
+# Prueba Técnica - Ingeniero de Datos
 ### RetailMax · Escenario B – Retail y Comercio Electrónico
 
 > **Candidato:** Jose Miguel Herrera Gutierrez 
@@ -11,18 +11,18 @@
 
 ---
 
-## 🤝 Saludo Cordial
+## Saludo Cordial
 
 Agradezco sinceramente la oportunidad de participar en esta prueba técnica de **DataKnow**. Ha sido un verdadero honor trabajar en este desafío y demostrar mis habilidades como Ingeniero de Datos. Espero que este proyecto refleje mi dedicación, conocimiento técnico y pasión por la ingeniería de datos moderna. Saludos cordiales a quienes revisen este trabajo.
 
-## 🎯 Escenario Elegido: B – Retail y Comercio Electrónico
+## Escenario Elegido: B - Retail y Comercio Electrónico
 
 RetailMax es una cadena de retail que necesita optimizar su cadena de suministro mediante análisis de datos. Este escenario fue elegido porque:
 - Lógica de negocio clara y relatable
 - Datos reales de ventas, inventario y devoluciones
 - Aplicación práctica de RFM y análisis de quiebres de stock
 
-## ☁️ Plataforma Elegida: Microsoft Azure
+## Plataforma Elegida: Microsoft Azure
 
 Se seleccionó Azure porque:
 - **Data Lake Storage Gen2** para almacenamiento escalable
@@ -31,7 +31,7 @@ Se seleccionó Azure porque:
 - **Terraform** para infraestructura como código (IaC)
 - Integración nativa con servicios Microsoft
 
-## 📋 Tabla de Contenido
+## Tabla de Contenido
 
 - [Fase 1 – Generación de datos sintéticos](#fase-1)
 - [Fase 2 – Infraestructura como Código](#fase-2)
@@ -47,8 +47,8 @@ Se seleccionó Azure porque:
 
 ---
 
-## 👋 Cierre
+## Cierre
 
-Gracias nuevamente por revisar este proyecto. Quedo atenta a cualquier pregunta, sugerencia o feedback. ¡Es un honor trabajar con **DataKnow**!
+Gracias nuevamente por revisar este proyecto. Quedo atenta a cualquier pregunta, sugerencia o feedback. Es un honor trabajar con DataKnow.
 
-**Jose Miguel Herrera Gutierrez** 📊✨
+**Jose Miguel Herrera Gutierrez**
