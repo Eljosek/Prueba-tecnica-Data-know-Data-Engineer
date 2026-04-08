@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+.env
+venv/
+.venv/
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+
+# Azure CLI credentials
+.azure/
+
+# Data files (generados localmente)
+data-generation/output/
+*.parquet
+*.csv
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Secrets
+*.pem
+*.key
+credentials.json
