@@ -1,0 +1,49 @@
+# Configuración de generación de datos sintéticos - Escenario B Retail
+seed: 42
+
+# Rango de fechas para los datos
+date_range:
+  start: "2023-01-01"
+  end: "2024-12-31"
+
+# Formatos de salida
+output_formats: 
+  - csv
+  - parquet
+
+# Volúmenes de datos por tabla
+volumes:
+  MSTR_PROVEEDORES: 800
+  MSTR_TIENDAS: 150
+  MSTR_ARTICULOS: 5000
+  CRM_MIEMBROS: 50000
+  TRANS_VENTAS: 1000000
+  INV_STOCK_DIARIO: 750000
+  POST_DEVOLUCIONES: 50000
+
+# Anomalías intencionales (para simular datos reales)
+anomalies:
+  null_rate: 0.05  # 5% valores nulos
+  duplicate_rate: 0.001  # 0.1% registros duplicados
+  out_of_range_rate: 0.001  # 0.1% valores fuera de rango
+  referential_integrity_violation_rate: 0.005  # 0.5% violaciones FK
+
+# Configuración de rutas
+output_path: "data-generation/output"
+
+# Paises disponibles (para distribución realista)
+paises:
+  - Colombia
+  - Mexico
+  - Peru
+  - Ecuador
+  - Chile
+
+# Categorías de productos (3 niveles)
+categorias_nivel1:
+  - Alimentos y bebidas
+  - Cuidado personal
+  - Hogar y limpieza
+  - Electronica y tecnologia
+  - Ropa y calzado
+  - Bebes y maternidad
