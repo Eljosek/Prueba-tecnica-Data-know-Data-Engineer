@@ -1,4 +1,4 @@
-![DataKnow Logo](./images/dataknow-logo.png)
+![DataKnow Logo](./images/logo2020_DataKnow-compressor.png)
 
 # Prueba Técnica - Ingeniero de Datos
 ### RetailMax · Escenario B – Retail y Comercio Electrónico
@@ -49,6 +49,6 @@ Se seleccionó Azure porque:
 
 ## Cierre
 
-Gracias nuevamente por revisar este proyecto. Quedo atenta a cualquier pregunta, sugerencia o feedback. Es un honor trabajar con DataKnow.
+Gracias nuevamente por revisar este proyecto. Quedo atento a cualquier pregunta, sugerencia o feedback. Es un honor trabajar con DataKnow.
 
 **Jose Miguel Herrera Gutierrez**
