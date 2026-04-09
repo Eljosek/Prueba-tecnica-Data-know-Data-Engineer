@@ -31,3 +31,7 @@ data-generation/output/
 *.pem
 *.key
 credentials.json
+tfplan
+*.tfstate
+*.tfstate.backup
+infra/.terraform.tfvars.backup
