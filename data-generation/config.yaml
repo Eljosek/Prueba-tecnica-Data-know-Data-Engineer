@@ -62,8 +62,8 @@ ciudades:
 
 # Configuración de database (para fase de carga - actualizar con valores reales)
 database:
-  server: "dataknow.database.windows.net"
-  database: "RetailMax"
+  server: "sqlsrv-retailmax-brs-dev.database.windows.net"
+  database: "sqldb-retailmax-brs-dev"
   username: "${SQLSERVER_USER}"  # Usar variables de entorno
   password: "${SQLSERVER_PASSWORD}"
   port: 1433
