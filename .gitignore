@@ -35,3 +35,8 @@ tfplan
 *.tfstate
 *.tfstate.backup
 infra/.terraform.tfvars.backup
+
+# Load script logs
+data-generation/load_log.txt
+data-generation/load_err.txt
+
