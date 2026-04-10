@@ -27,6 +27,18 @@ data-generation/output/
 .vscode/settings.json
 .idea/
 
+# PDFs y documentos de prueba técnica
+*.pdf
+FASE_1_EXPLICACION_COMPLETA.md
+RESUMEN_SESION.md
+
+# Images y screenshots
+Images/
+docs/screenshots/
+
+# Local documentation
+Guia_cuentas_cloud.md
+
 # Secrets
 *.pem
 *.key
