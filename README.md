@@ -1,6 +1,4 @@
-![DataKnow Logo](./images/logo2020_DataKnow-compressor.png)
-
-# Prueba Técnica - Ingeniero de Datos
+# 🚀 Prueba Técnica - Ingeniero de Datos
 ### RetailMax · Escenario B – Retail y Comercio Electrónico
 
 > **Candidato:** Jose Miguel Herrera Gutierrez 

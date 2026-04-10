@@ -32,9 +32,11 @@ data-generation/output/
 FASE_1_EXPLICACION_COMPLETA.md
 RESUMEN_SESION.md
 
-# Images y screenshots
+# Images, assets externos y screenshots
 Images/
+images/
 docs/screenshots/
+*.png
 
 # Local documentation
 Guia_cuentas_cloud.md
