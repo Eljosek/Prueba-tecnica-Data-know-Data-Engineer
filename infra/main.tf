@@ -22,10 +22,9 @@ resource "azurerm_storage_account" "data_lake" {
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
-  account_replication_type = "LRS"  # Locally Redundant Storage
+  account_replication_type = "LRS"
   access_tier              = var.storage_access_tier
 
-  # Habilitar Data Lake Gen2
   is_hns_enabled = true
 
   https_traffic_only_enabled = true
@@ -34,7 +33,7 @@ resource "azurerm_storage_account" "data_lake" {
 }
 
 # ==============================================================================
-# 3. STORAGE CONTAINERS (Bronze, Silver, Gold)
+# 3. STORAGE CONTAINERS (Bronze, Silver, Gold, tfstate)
 # ==============================================================================
 
 resource "azurerm_storage_container" "bronze" {
@@ -51,6 +50,12 @@ resource "azurerm_storage_container" "silver" {
 
 resource "azurerm_storage_container" "gold" {
   name                  = local.gold_container_name
+  storage_account_name  = azurerm_storage_account.data_lake.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "tfstate" {
+  name                  = local.tfstate_container_name
   storage_account_name  = azurerm_storage_account.data_lake.name
   container_access_type = "private"
 }
@@ -72,7 +77,6 @@ resource "azurerm_mssql_server" "sql_server" {
   tags = local.common_tags
 }
 
-# Firewall: Permitir Azure services
 resource "azurerm_mssql_firewall_rule" "azure_services" {
   name             = "AllowAzureServices"
   server_id        = azurerm_mssql_server.sql_server.id
@@ -87,20 +91,17 @@ resource "azurerm_mssql_firewall_rule" "azure_services" {
 resource "azurerm_mssql_database" "retailmax" {
   name      = local.sql_database_name
   server_id = azurerm_mssql_server.sql_server.id
+  sku_name  = var.sql_sku
 
-  sku_name = var.sql_sku
-
-  # Backup automÃ¡tico ("Local" = LRS en este parÃ¡metro)
   storage_account_type = "Local"
 
   tags = local.common_tags
 }
 
 # ==============================================================================
-# 6. KEY VAULT (Secretos/Credenciales)
+# 6. KEY VAULT
 # ==============================================================================
 
-# Obtener el ID del tenant actual
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "main" {
@@ -132,6 +133,12 @@ resource "azurerm_key_vault" "main" {
   }
 
   tags = local.common_tags
+
+  # Ignorar cambios en access_policy inline para no entrar en conflicto
+  # con los azurerm_key_vault_access_policy separados (ej: ADF)
+  lifecycle {
+    ignore_changes = [access_policy]
+  }
 }
 
 # ==============================================================================
@@ -145,9 +152,8 @@ resource "azurerm_key_vault_secret" "sql_password" {
 }
 
 resource "azurerm_key_vault_secret" "sql_connection_string" {
-  name  = "sql-connection-string"
-  value = "Server=tcp:${azurerm_mssql_server.sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.retailmax.name};Persist Security Info=False;User ID=${var.sql_admin_login};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-
+  name         = "sql-connection-string"
+  value        = "Server=tcp:${azurerm_mssql_server.sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.retailmax.name};Persist Security Info=False;User ID=${var.sql_admin_login};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.main.id
 }
 
@@ -181,9 +187,9 @@ resource "azurerm_application_insights" "main" {
   resource_group_name = azurerm_resource_group.main.name
   application_type    = "web"
 
-  workspace_id          = azurerm_log_analytics_workspace.main.id
-  retention_in_days     = var.app_insights_retention
-  disable_ip_masking    = false
+  workspace_id               = azurerm_log_analytics_workspace.main.id
+  retention_in_days          = var.app_insights_retention
+  disable_ip_masking         = false
   internet_ingestion_enabled = true
   internet_query_enabled     = true
 
@@ -191,7 +197,40 @@ resource "azurerm_application_insights" "main" {
 }
 
 # ==============================================================================
-# 10. DIAGNOSTIC SETTINGS (SQL Server â†’ Log Analytics)
+# 10. AZURE DATA FACTORY
+# ==============================================================================
+
+resource "azurerm_data_factory" "main" {
+  name                = local.data_factory_name
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_key_vault_access_policy" "adf_policy" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_data_factory.main.identity[0].principal_id
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
+}
+
+resource "azurerm_role_assignment" "adf_storage" {
+  scope                = azurerm_storage_account.data_lake.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.main.identity[0].principal_id
+}
+
+# ==============================================================================
+# 11. DIAGNOSTIC SETTINGS (SQL Server a Log Analytics)
 # ==============================================================================
 
 resource "azurerm_monitor_diagnostic_setting" "sql_diagnostics" {
@@ -199,9 +238,11 @@ resource "azurerm_monitor_diagnostic_setting" "sql_diagnostics" {
   target_resource_id = azurerm_mssql_server.sql_server.id
 
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+
   metric {
     category = "AllMetrics"
     enabled  = true
   }
 }
+
 

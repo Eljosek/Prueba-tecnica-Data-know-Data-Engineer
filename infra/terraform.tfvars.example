@@ -1,0 +1,17 @@
+# Copiar este archivo como terraform.tfvars y completar los valores reales.
+# NUNCA subir terraform.tfvars al repositorio (está en .gitignore).
+
+environment    = "dev"
+project_name   = "retailmax"
+location       = "brazilsouth"
+location_short = "brs"
+
+# Credenciales SQL (usar una contraseña fuerte: min 12 caracteres, mayúscula, número, símbolo)
+sql_admin_login    = "sqladmin"
+sql_admin_password = "REEMPLAZAR_CON_PASSWORD_SEGURO"
+
+# Opciones de infraestructura
+sql_sku                 = "S0"
+storage_access_tier     = "Hot"
+app_insights_retention  = 30
+log_analytics_retention = 30

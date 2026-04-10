@@ -1,5 +1,4 @@
-# Outputs: Lo que Terraform exporta después de crear los recursos
-# Estos valores se usan en las próximas fases
+﻿# Outputs de Terraform para el proyecto RetailMax
 
 # ==============================================================================
 # RESOURCE GROUP
@@ -37,7 +36,7 @@ output "storage_primary_blob_endpoint" {
 output "storage_connection_string" {
   value       = azurerm_storage_account.data_lake.primary_connection_string
   sensitive   = true
-  description = "Connection string (SECRETO)"
+  description = "Connection string del Storage Account"
 }
 
 # ==============================================================================
@@ -75,7 +74,7 @@ output "sql_server_name" {
 
 output "sql_server_fqdn" {
   value       = azurerm_mssql_server.sql_server.fully_qualified_domain_name
-  description = "FQDN del SQL Server (para conexiones)"
+  description = "FQDN del SQL Server para conexiones"
 }
 
 output "sql_database_id" {
@@ -91,13 +90,13 @@ output "sql_database_name" {
 output "sql_admin_login" {
   value       = var.sql_admin_login
   sensitive   = true
-  description = "Login del admin SQL"
+  description = "Login del administrador SQL"
 }
 
 output "sql_connection_string" {
   value       = "Server=tcp:${azurerm_mssql_server.sql_server.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.retailmax.name};User ID=${var.sql_admin_login};Password=<PASSWORD>;Encrypt=True;Connection Timeout=30;"
   sensitive   = true
-  description = "Connection string plantilla (reemplazar <PASSWORD>)"
+  description = "Plantilla de connection string (reemplazar <PASSWORD>)"
 }
 
 # ==============================================================================
@@ -155,19 +154,39 @@ output "app_insights_connection_string" {
 }
 
 # ==============================================================================
-# SUMMARY (Útil en terminal)
+# AZURE DATA FACTORY
+# ==============================================================================
+
+output "data_factory_name" {
+  value       = azurerm_data_factory.main.name
+  description = "Nombre del Azure Data Factory"
+}
+
+output "data_factory_id" {
+  value       = azurerm_data_factory.main.id
+  description = "ID del Azure Data Factory"
+}
+
+output "data_factory_url" {
+  value       = "https://adf.azure.com/en/home?factory=${azurerm_data_factory.main.id}"
+  description = "URL del portal de Azure Data Factory"
+}
+
+# ==============================================================================
+# RESUMEN DE DESPLIEGUE
 # ==============================================================================
 
 output "deployment_summary" {
   value = {
-    environment            = var.environment
-    region                 = var.location
-    resource_group         = azurerm_resource_group.main.name
-    storage_account        = azurerm_storage_account.data_lake.name
-    sql_server             = azurerm_mssql_server.sql_server.fully_qualified_domain_name
-    sql_database           = azurerm_mssql_database.retailmax.name
-    key_vault              = azurerm_key_vault.main.name
+    environment             = var.environment
+    region                  = var.location
+    resource_group          = azurerm_resource_group.main.name
+    storage_account         = azurerm_storage_account.data_lake.name
+    sql_server              = azurerm_mssql_server.sql_server.fully_qualified_domain_name
+    sql_database            = azurerm_mssql_database.retailmax.name
+    key_vault               = azurerm_key_vault.main.name
     log_analytics_workspace = azurerm_log_analytics_workspace.main.name
+    data_factory            = azurerm_data_factory.main.name
   }
-  description = "Resumen de recursos desplegados"
+  description = "Resumen de todos los recursos desplegados"
 }

@@ -1,15 +1,17 @@
-# backend.tf - Configuración del estado remoto de Terraform
-# 
-# DESARROLLO: Estado LOCAL (.tfstate en tu máquina)
-# PRODUCCIÓN: Estado REMOTO (Azure Storage Account)
+﻿# backend.tf - Documentacion del estado remoto de Terraform
 #
-# Por ahora usamos LOCAL para simplificar
-
-# El archivo .tfstate será creado en la raíz del proyecto
-# Cuando git pull ocurra, todos tendrán el mismo state
-
-# Para usar backend remoto después (producción):
-# 1. Crear manualmente un Storage Account en Azure
-# 2. Descomenta la sección en providers.tf
-# 3. Ejecutar: terraform init
-# 4. Elegir "yes" para migrar state a remoto
+# El estado de Terraform se almacena remotamente en Azure Storage Account.
+# Configuracion en providers.tf dentro del bloque terraform { backend "azurerm" {} }
+#
+# Recursos:
+#   Resource Group:   rg-retailmax-brs-dev
+#   Storage Account:  stgretailmaxbrsdev
+#   Contenedor:       tfstate
+#   Clave:            dev.terraform.tfstate
+#
+# Para inicializar por primera vez en una maquina nueva:
+#   az login
+#   terraform init
+#
+# Para migrar de backend local a remoto:
+#   terraform init -migrate-state -force-copy

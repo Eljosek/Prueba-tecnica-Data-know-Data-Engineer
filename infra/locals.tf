@@ -25,6 +25,10 @@ locals {
   bronze_container_name = "bronze"
   silver_container_name = "silver"
   gold_container_name   = "gold"
+  tfstate_container_name = "tfstate"
+  
+  # Azure Data Factory
+  data_factory_name = "adf-${local.resource_base_name}"
   
   # Tags comunes
   common_tags = {

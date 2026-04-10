@@ -1,4 +1,4 @@
-terraform {
+﻿terraform {
   required_version = ">= 1.0"
 
   required_providers {
@@ -8,13 +8,12 @@ terraform {
     }
   }
 
-  # Backend comentado: descomenta después de crear Storage Account manualmente
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-retailmax-usoeast-dev"
-  #   storage_account_name = "stgterraformusoeastdev"
-  #   container_name       = "tfstate"
-  #   key                  = "retailmax.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "rg-retailmax-brs-dev"
+    storage_account_name = "stgretailmaxbrsdev"
+    container_name       = "tfstate"
+    key                  = "dev.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -26,4 +25,3 @@ provider "azurerm" {
     }
   }
 }
-
