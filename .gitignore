@@ -31,12 +31,15 @@ data-generation/output/
 *.pdf
 FASE_1_EXPLICACION_COMPLETA.md
 RESUMEN_SESION.md
+Prueba técnica Ingeniero de Datos - Actualizada.txt
+infra/DEPLOYMENT_INVENTORY.txt
 
-# Images, assets externos y screenshots
+# Images y assets externos
 Images/
 images/
+
+# Screenshots folder (archivos temporales, fake evidence)
 docs/screenshots/
-*.png
 
 # Local documentation
 Guia_cuentas_cloud.md

@@ -1,4 +1,4 @@
-# 🚀 Prueba Técnica - Ingeniero de Datos
+# Prueba Tecnica - Ingeniero de Datos
 ### RetailMax · Escenario B – Retail y Comercio Electrónico
 
 > **Candidato:** Jose Miguel Herrera Gutierrez 
@@ -39,7 +39,7 @@ Se seleccionó Azure porque:
 
 ---
 
-**Estado:** En desarrollo (Fase 1)
+**Estado:** En desarrollo (Fase 2 completada — pendiente Fase 3, 4 y 5)
 
 *Última actualización: 8 de abril de 2026*
 
