@@ -39,6 +39,7 @@ Se seleccionó Azure porque:
 - [Fase 4 – Orquestacion ADF](#fase-4--orquestacion-adf)
 - [Fase 5 – Gobierno y Seguridad](#fase-5--gobierno-y-seguridad)
 - [Extras – CI/CD, Lineage y Monitoreo](#extras--cicd-lineage-y-monitoreo)
+- [Dashboard Power BI](#dashboard-power-bi)
 - [Reproduccion local](#reproduccion-local)
 
 ---
@@ -281,6 +282,28 @@ Definidas en `infra/main.tf` con Action Group para notificacion por correo:
 - **Action Group**: notificacion por correo configurada en Terraform
 - **3 alertas**: fallo de pipeline (Sev 1), exito diario (Sev 3), anomalia de volumen (Sev 2)
 - **Diagnosticos ADF**: logs de PipelineRuns, ActivityRuns y TriggerRuns a Log Analytics
+
+---
+
+## Dashboard Power BI
+
+Se incluye un dashboard de visualizacion con **Power BI Desktop** (gratuito) conectado
+directamente a las 8 vistas Gold de Azure SQL.
+
+### Paginas del dashboard
+
+| Pagina | Contenido |
+|---|---|
+| **Resumen Ejecutivo** | KPIs diarios: ventas netas, transacciones, clientes unicos, ticket promedio (desde `kpi_ejecutivo`) |
+| **Analisis de Ventas** | Ventas por canal, pais y categoria. Top 10 productos. Segmentacion con/sin descuento |
+| **Inventario** | Productos con alerta de quiebre, cobertura promedio, stock disponible vs reservado |
+| **Devoluciones** | Tasa de devolucion por producto, motivos principales, tendencia mensual |
+| **Clientes RFM** | Segmentos Champions / Loyal / At\_Risk, clientes activos vs inactivos 90d |
+
+### Archivos de referencia
+
+- `dashboards/README.md`: guia completa de conexion, modelo de datos y relaciones
+- `dashboards/dax_measures.md`: medidas DAX (ventas, inventario, devoluciones, RFM, KPIs)
 
 ---
 

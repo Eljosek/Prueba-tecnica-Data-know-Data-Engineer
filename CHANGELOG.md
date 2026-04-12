@@ -11,6 +11,17 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.0] — 2026-04-12
+
+### Added
+- `dashboards/README.md` — guia de conexion Power BI Desktop a las 8 vistas Gold:
+  modelo de datos, relaciones, paleta de colores y diseño de 5 paginas.
+- `dashboards/dax_measures.md` — medidas DAX: ventas (7), inventario (4),
+  devoluciones (3), clientes RFM (4), KPIs ejecutivos (4).
+- `README.md` — seccion "Dashboard Power BI" con tabla de paginas y archivos de referencia.
+
+---
+
 ## [0.8.0] — 2026-04-12
 
 ### Added
