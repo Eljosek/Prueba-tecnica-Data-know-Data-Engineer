@@ -33,6 +33,8 @@ FASE_1_EXPLICACION_COMPLETA.md
 RESUMEN_SESION.md
 Prueba técnica Ingeniero de Datos - Actualizada.txt
 infra/DEPLOYMENT_INVENTORY.txt
+verify_views.py
+orchestration/run_views_pipeline.py
 
 # Images y assets externos
 Images/

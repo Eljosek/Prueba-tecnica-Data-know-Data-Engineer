@@ -38,6 +38,7 @@ Se seleccionó Azure porque:
 - [Fase 3 – Pipeline Medallion](#fase-3--pipeline-medallion)
 - [Fase 4 – Orquestacion ADF](#fase-4--orquestacion-adf)
 - [Fase 5 – Gobierno y Seguridad](#fase-5--gobierno-y-seguridad)
+- [Extras – CI/CD, Lineage y Monitoreo](#extras--cicd-lineage-y-monitoreo)
 - [Reproduccion local](#reproduccion-local)
 
 ---
@@ -157,19 +158,20 @@ Los errores de registro individual se almacenan en `pipeline_errors`.
 `pipelines/silver/export_quality_logs.py`: exporta los logs a `silver/logs/` en Storage.
 
 ### Gold
-`pipelines/gold/views.sql`: 7 vistas SQL (DDL con `CREATE OR ALTER VIEW`):
+`pipelines/gold/views.sql`: 8 vistas SQL (DDL con `CREATE OR ALTER VIEW`):
 
 | Vista | Tipo | Descripcion |
 |---|---|---|
-| `dim_productos` | Dimension | Catalogo de 5 000 productos con categoria |
-| `dim_tiendas` | Dimension | 200 tiendas con tipo y ubicacion |
-| `dim_clientes` | Dimension | 50 000 clientes CRM |
-| `fact_ventas` | Hecho | 1.5M transacciones con net_amount calculado |
-| `fact_inventario` | Hecho | Snapshots diarios con available_stock |
-| `fact_devoluciones` | Hecho | Devoluciones con refund_amount |
-| `fact_rfm_clientes` | Hecho | RFM (Recencia / Frecuencia / Monetario) ventana 90 dias |
+| `dim_productos` | Dimension | JOIN con proveedores, `estimated_margin` (30%) |
+| `dim_tiendas` | Dimension | `zona_distribucion` calculada por `id_pais % 5` |
+| `dim_clientes` | Dimension | Género estandarizado, `age_range` imputado con moda, `antiguedad_dias` |
+| `fact_ventas` | Hecho | `COALESCE` para anónimos, `gross/net_amount`, `ind_con_descuento` |
+| `fact_inventario` | Hecho | CTE ventas 14d, `avg_daily_sales_14d`, `cobertura_dias`, `alerta_quiebre` |
+| `fact_devoluciones` | Hecho | `original_unit_price` por JOIN, `return_rate_by_product` por CTE |
+| `fact_rfm_clientes` | Hecho | RFM ventana 90 días, `NTILE(5)`, segmento R#-F#-M#, clasificación |
+| `kpi_ejecutivo` | KPI | Agregación diaria por fecha/país/canal: transacciones, clientes, ventas brutas/netas |
 
-`pipelines/gold/export_to_storage.py`: exporta las 7 vistas como Parquet al contenedor `gold`.
+`pipelines/gold/export_to_storage.py`: exporta las 8 vistas como Parquet al contenedor `gold`.
 
 ---
 
@@ -218,13 +220,67 @@ python orchestration/deploy_adf_dataflows.py
 
 ## Fase 5 – Gobierno y Seguridad
 
-Implementado en `infra/main.tf`:
-
+### Gestion de Secretos
 - **Key Vault** (`kv-retailmax-brs-dev`): toda credencial (SQL password, connection strings) se almacena como secreto. Ningun script contiene credenciales en texto plano; se leen de variables de entorno en ejecucion local y de Key Vault en ADF.
-- **Managed Identity**: Azure Data Factory usa identidad administrada asignada por el sistema (`SystemAssigned`) con acceso `Get`/`List` a secretos de Key Vault y rol `Storage Blob Data Contributor` sobre el Storage Account.
-- **RBAC minimo**: cada recurso solo tiene los permisos necesarios para operar.
-- **Diagnostics**: SQL Server envia logs a Log Analytics Workspace para auditoria.
-- **Sin secretos en git**: `.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform se almacena en el Storage Account, no en el repositorio.
+- **Sin secretos en git**: `.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform se almacena en Storage Account remoto.
+
+### Managed Identity y RBAC
+- **Managed Identity**: ADF usa identidad `SystemAssigned` con acceso `Get`/`List` a Key Vault y rol `Storage Blob Data Contributor` en Storage.
+- **3 roles RBAC** definidos en `orchestration/deploy_rbac.py`:
+
+| Rol | Permisos Storage | Permisos SQL | Scope |
+|---|---|---|---|
+| Ingeniero de Datos | `Blob Data Contributor` (bronze/silver/gold) | `Contributor` | Por contenedor |
+| Analista de Datos | `Blob Data Reader` (solo gold) | `Reader` | Solo gold |
+| Administrador | `Owner` | `Owner` | Resource Group completo |
+
+### Alertas (Azure Monitor)
+Definidas en `infra/main.tf` con Action Group para notificacion por correo:
+
+| Alerta | Severidad | Descripcion |
+|---|---|---|
+| `alert-adf-pipeline-failed` | 1 (Critica) | Notifica cuando un pipeline de ADF falla |
+| `alert-adf-pipeline-succeeded` | 3 (Info) | Reporte diario: confirma ejecucion exitosa |
+| `alert-volume-anomaly` | 2 (Warning) | Detecta cuando no hay ejecuciones de Bronze en 24h |
+
+### Diagnosticos
+- SQL Server y ADF envian logs a Log Analytics Workspace con categorias `PipelineRuns`, `ActivityRuns`, `TriggerRuns`.
+- Application Insights disponible para monitoreo de la aplicacion.
+
+### Catalogo de Datos
+`docs/data_catalog.md`: catalogo completo con una seccion por tabla (Bronze) y por vista (Gold). Documenta nombre de campo, tipo, origen, si es calculado, PII y regla de negocio.
+
+### Linaje de Datos
+`docs/data_lineage.md`: diagrama Mermaid con el flujo completo de datos desde origen SQL hasta las 8 vistas Gold, incluyendo detalle de campos calculados y reglas de negocio por vista.
+
+### Pruebas de Calidad
+`pipelines/tests/quality_tests.py`: 5 pruebas automatizadas contra las vistas Gold:
+1. PKs sin nulos en todas las vistas
+2. Sin fechas futuras en tablas de hechos
+3. `cobertura_dias` y `physical_stock` no negativos
+4. `rfm_segment` con patron R#-F#-M# y clasificacion sin nulos
+5. `net_amount >= 0` en todas las ventas
+
+---
+
+## Extras – CI/CD, Lineage y Monitoreo
+
+### CI/CD con GitHub Actions
+`.github/workflows/ci.yml`: pipeline de integracion continua que se ejecuta en cada push/PR a `main`:
+- **Python Lint**: valida estilo de codigo con `flake8` (max 120 caracteres)
+- **Quality Tests**: ejecuta las 5 pruebas de calidad contra Azure SQL
+- **Terraform Validate**: valida sintaxis y formato de la infraestructura IaC
+
+### Linaje de Datos
+`docs/data_lineage.md`: documentacion completa del flujo de datos con diagramas Mermaid:
+- Flujo general: Origen → Bronze → Silver → Gold (por tabla y vista)
+- Detalle por vista Gold: campos calculados, tablas origen, reglas de negocio
+- Cadena de orquestacion: Trigger → Maestro → Bronze → Silver → Gold → Calidad
+
+### Monitoreo y Alertas
+- **Action Group**: notificacion por correo configurada en Terraform
+- **3 alertas**: fallo de pipeline (Sev 1), exito diario (Sev 3), anomalia de volumen (Sev 2)
+- **Diagnosticos ADF**: logs de PipelineRuns, ActivityRuns y TriggerRuns a Log Analytics
 
 ---
 
@@ -270,7 +326,7 @@ python orchestration/pipeline_orchestrator.py
 
 ---
 
-*Ultima actualizacion: 11 de abril de 2026*
+*Ultima actualizacion: 12 de abril de 2026*
 
 ---
 

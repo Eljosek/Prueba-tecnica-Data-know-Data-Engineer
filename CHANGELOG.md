@@ -11,6 +11,47 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.0] — 2026-04-12
+
+### Added
+- `infra/main.tf` — Action Group (`ag-retailmax-*`) con receptor de correo para alertas.
+- `infra/main.tf` — 3 reglas de alerta en Azure Monitor:
+  - `alert-adf-pipeline-failed` (Sev 1): notifica cuando un pipeline de ADF falla.
+  - `alert-adf-pipeline-succeeded` (Sev 3): reporte diario de ejecucion exitosa.
+  - `alert-volume-anomaly` (Sev 2): scheduled query que detecta ausencia de ejecuciones Bronze en 24h.
+- `infra/main.tf` — Diagnostic Settings de ADF a Log Analytics (PipelineRuns, ActivityRuns,
+  TriggerRuns).
+- `infra/variables.tf` — variable `alert_email_address` para configurar el correo de alertas.
+- `.github/workflows/ci.yml` — pipeline CI/CD con GitHub Actions:
+  - `python-lint`: valida estilo con flake8.
+  - `quality-tests`: ejecuta quality_tests.py contra Azure SQL.
+  - `terraform-validate`: valida sintaxis y formato de IaC.
+- `docs/data_lineage.md` — documentacion de linaje de datos con diagramas Mermaid:
+  - Flujo general Origen → Bronze → Silver → Gold (por tabla y vista).
+  - Detalle por vista Gold: campos calculados, tablas origen, reglas de negocio.
+  - Cadena de orquestacion: Trigger → Maestro → Bronze → Silver → Gold → Calidad.
+
+### Changed
+- `README.md` — actualizado con Fase 5 completa (3 alertas, 3 roles RBAC, catalogo de datos,
+  linaje de datos, 5 pruebas de calidad), seccion Extras (CI/CD, Lineage, Monitoreo), tabla
+  Gold actualizada a 8 vistas con descripcion de reglas de negocio por vista.
+- `docs/` — screenshots renombrados con convencion profesional secuencial:
+  - `03-sql-verification-azure.png` → `04-fase1-sql-verification-azure.png`
+  - `04-fase2-resource-visualizer.png` → `05-fase2-resource-visualizer.png`
+  - `8 vistas gold.png` → `06-fase3-gold-views.png`
+  - `conjunto de datos.png` → `07-fase1-dataset-overview.png`
+  - `Datos de kpi_ejecutivo.png` → `08-fase3-kpi-ejecutivo.png`
+  - `dim_productos.png` → `09-fase3-dim-productos.png`
+  - `Flujo_datos_16.png` → `10-fase4-dataflows-16.png`
+  - `pipeline_medallion_etl.png` → `11-fase3-pipeline-medallion.png`
+  - `Tablas_tracking_sql.png` → `12-fase4-tablas-tracking.png`
+
+### Fixed
+- Permiso ADF MSI: asignado `Storage Blob Data Contributor` via Azure CLI (resuelve error 403
+  Forbidden al escribir en Storage Account desde ADF Managed Identity).
+
+---
+
 ## [0.7.0] — 2026-04-13
 
 ### Added

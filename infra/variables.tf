@@ -61,6 +61,12 @@ variable "log_analytics_retention" {
   default     = 30
 }
 
+variable "alert_email_address" {
+  type        = string
+  description = "Correo electronico para recibir alertas de Azure Monitor"
+  default     = ""
+}
+
 variable "tags" {
   type = object({
     Environment = string

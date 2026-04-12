@@ -147,7 +147,6 @@ def main():
                 "tableName": {"value": "@dataset().tableName", "type": "Expression"}
             },
             "parameters": {"tableName": {"type": "String", "defaultValue": ""}},
-            "schema": [],
             "description": "Dataset parametrizado para cualquier tabla de Azure SQL",
         }
     )
@@ -187,7 +186,6 @@ def main():
                 "carpeta": {"type": "String", "defaultValue": ""},
                 "archivo": {"type": "String", "defaultValue": ""},
             },
-            "schema": [],
             "description": "Dataset parametrizado Parquet en cualquier contenedor del Data Lake",
         }
     )
