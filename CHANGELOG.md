@@ -9,20 +9,54 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.5.0] — 2026-04-11
+
 ### Added
-- `data-generation/load_to_sql.py` — script de carga de 7 archivos CSV a Azure SQL Database
-  usando `pyodbc` directo con `fast_executemany`, detección automática de driver ODBC,
-  inferencia de tipos SQL, normalización de nulos y verificación de conteos finales.
-- `docs/er_diagram.md` — diagrama Entidad-Relación en formato Mermaid con las 7 tablas del
-  modelo de datos: MSTR_PROVEEDORES, MSTR_TIENDAS, MSTR_ARTICULOS, CRM_MIEMBROS,
-  TRANS_VENTAS, INV_STOCK_DIARIO y POST_DEVOLUCIONES.
-- `infra/README.md` — guía de despliegue de la infraestructura Terraform: arquitectura,
-  recursos provisionados, variables, pasos de deploy, backend remoto y convenciones de nombrado.
+- `orchestration/deploy_adf_pipelines.py` — despliega via SDK Python (`azure-mgmt-datafactory`)
+  los 2 linked services, 2 datasets y 5 pipelines de ADF. Incluye autenticacion interactiva via
+  `InteractiveBrowserCredential`.
+- `orchestration/deploy_adf_dataflows.py` — crea los 16 Mapping Data Flows en ADF:
+  - 7 Silver: filtro de nulos + columnas de auditoria `silver_ingest_ts` / `silver_source`
+  - 7 Gold: lectura de vistas SQL + columna `gold_ingest_ts`
+  - 2 Calidad: `DF_Silver_Quality_Report` (metricas agregadas) y `DF_Quality_Checks` (errores)
+- `orchestration/PL_Orquestador_Maestro.json` — exportacion del pipeline maestro en formato
+  ARM/ADF JSON.
+- `infra/adf_pipelines.tf` — definicion IaC Terraform de linked services, datasets y 5 pipelines.
 
 ### Changed
-- `data-generation/requirements.txt` — añadidos `pyodbc>=4.0.39` y `python-dotenv>=1.0.0`.
-- `data-generation/config.yaml` — corregido nombre del servidor SQL
-  (`sqlsrv-retailmax-brs-dev.database.windows.net`) y base de datos (`sqldb-retailmax-brs-dev`).
+- `README.md` — actualizado para documentar las 5 fases completas con arquitectura, recursos
+  Azure, instrucciones de reproduccion y tabla de data flows.
+
+### Fixed
+- Corregido nombre de columna `error_timestamp` → `timestamp_error` en `PL_Calidad_Datos`,
+  `orchestration/deploy_adf_pipelines.py` e `infra/adf_pipelines.tf`. La columna correcta en
+  `pipeline_errors` es `timestamp_error`.
+
+---
+
+## [0.4.0] — 2026-04-10
+
+### Added
+- `pipelines/bronze/ingestion.py` — ingesta desde Azure SQL hacia el contenedor `bronze` en
+  Parquet. Agrega columnas de auditoria: `batch_id`, `ingest_timestamp`, `source_system`.
+- `pipelines/silver/cleaning.py` — limpieza y deduplicacion (`SELECT DISTINCT`) con registro
+  de metricas en `pipeline_quality_report` y `pipeline_errors`.
+- `pipelines/silver/export_quality_logs.py` — exporta logs de calidad a `silver/logs/` en
+  Azure Blob Storage.
+- `pipelines/gold/views.sql` — 7 vistas SQL (`CREATE OR ALTER VIEW`): dim_productos,
+  dim_tiendas, dim_clientes, fact_ventas, fact_inventario, fact_devoluciones, fact_rfm_clientes.
+- `pipelines/gold/create_views.py` — ejecuta las 7 vistas en Azure SQL Database.
+- `pipelines/gold/export_to_storage.py` — exporta las 7 vistas como Parquet al contenedor `gold`.
+- `orchestration/pipeline_orchestrator.py` — orquestador Python local que ejecuta
+  Bronze → Silver → Gold con logging detallado.
+- `migrations/01_crear_tablas_tracking.sql` — DDL de tablas `pipeline_quality_report` y
+  `pipeline_errors` para trazabilidad de ejecuciones.
+
+---
+
+## [0.3.0] — 2026-04-09
 
 ---
 
@@ -88,7 +122,9 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-[Unreleased]: https://github.com/JoseMariaDiazContador/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/JoseMariaDiazContador/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/JoseMariaDiazContador/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/JoseMariaDiazContador/Prueba-tecnica-Data-know-Data-Engineer/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer/releases/tag/v0.1.0
