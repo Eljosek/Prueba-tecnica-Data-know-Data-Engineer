@@ -11,6 +11,56 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.0] — 2026-04-13
+
+### Added
+- `docs/data_catalog.md` — catalogo de datos completo con una seccion por tabla (Bronze) y por
+  vista (Gold). Documenta nombre de campo, tipo, origen, si es calculado, si contiene PII y la
+  regla de negocio aplicada. Incluye tabla de acceso por rol RBAC.
+- `pipelines/tests/quality_tests.py` — 5 pruebas automatizadas de calidad contra las vistas Gold
+  en Azure SQL:
+  - Test 1: PKs sin nulos (dim + fact + kpi).
+  - Test 2: sin fechas futuras en fact_ventas, fact_inventario, fact_devoluciones.
+  - Test 3: cobertura_dias y physical_stock no negativos en fact_inventario.
+  - Test 4: rfm_segment con patron Rx-Fy-Mz y rfm_classification sin nulos.
+  - Test 5: net_amount >= 0 en todas las ventas.
+  - Incluye reporte de volumetria por vista al final de cada ejecucion.
+- `orchestration/deploy_rbac.py` — asigna roles Azure RBAC a los tres perfiles del proyecto:
+  - Ingeniero de Datos: `Storage Blob Data Contributor` en bronze/silver/gold + `Contributor` en SQL.
+  - Analista de Datos: `Storage Blob Data Reader` unicamente en gold (bronze/silver denegado).
+  - Administrador: `Owner` sobre el resource group completo.
+
+---
+
+## [0.6.0] — 2026-04-12
+
+### Changed
+- `pipelines/gold/views.sql` — reescritura completa con todas las reglas de negocio del
+  Escenario B. Cambios por vista:
+  - `dim_productos`: JOIN con MSTR_PROVEEDORES → campos `supplier_name`, `supplier_country`,
+    `supplier_quality_score`. Campo calculado `estimated_margin` (30% del precio de lista).
+  - `dim_tiendas`: campo calculado `zona_distribucion` derivado de `id_pais % 5`.
+  - `dim_clientes`: estandarizacion de `gender` (O/NULL → No_informado), imputacion de
+    `age_range` nulos con moda por canal (subconsulta correlacionada), campo `antiguedad_dias`.
+  - `fact_ventas`: campo `customer_id` como COALESCE → 'ANONIMO' si nulo. Campo binario
+    `ind_con_descuento`.
+  - `fact_inventario`: CTE `ventas_14d` para calcular `avg_daily_sales_14d`, `cobertura_dias`
+    y `alerta_quiebre` (1 si cobertura < 7 dias con demanda activa).
+  - `fact_devoluciones`: JOIN con TRANS_VENTAS para `original_unit_price`. CTE `tasa_art` para
+    `return_rate_by_product`.
+  - `fact_rfm_clientes`: sin cambios (correcto desde v0.4.0).
+- `pipelines/gold/views.sql` — nueva vista `kpi_ejecutivo`: agrega por fecha, pais y canal
+  las metricas ejecutivas diarias (transacciones, clientes unicos, unidades, ventas brutas,
+  descuentos, ventas netas).
+- `orchestration/deploy_adf_pipelines.py`:
+  - Actualizado `VISTAS_GOLD` con las 8 vistas (incluida `kpi_ejecutivo`).
+  - Actualizados `SQL_VISTAS_DIM` y `SQL_VISTAS_FACT` con los nuevos SQL de todas las vistas.
+  - Descripcion del pipeline `PL_Vistas_Gold` actualizada a "8 vistas".
+  - Nuevo bloque al final: crea y activa `Trigger_Diario_0200` (ScheduleTrigger diario a las
+    02:00 AM UTC) apuntando a `PL_Orquestador_Maestro`.
+
+---
+
 ## [0.5.0] — 2026-04-11
 
 ### Added
