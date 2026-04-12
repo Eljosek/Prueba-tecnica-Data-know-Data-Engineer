@@ -1,0 +1,90 @@
+{
+  "name": "PL_Orquestador_Maestro",
+  "properties": {
+    "description": "Pipeline maestro que orquesta la ejecucion secuencial del pipeline medallion: Bronze (ingesta) -> Silver (limpieza) -> Gold (vistas analiticas) -> Calidad (validacion). Cada etapa espera la finalizacion exitosa de la anterior.",
+    "activities": [
+      {
+        "name": "Ejecutar_Ingesta_Bronze",
+        "type": "ExecutePipeline",
+        "dependsOn": [],
+        "policy": {
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "pipeline": {
+            "referenceName": "PL_Ingesta_Bronze",
+            "type": "PipelineReference"
+          },
+          "waitOnCompletion": true
+        }
+      },
+      {
+        "name": "Ejecutar_Limpieza_Silver",
+        "type": "ExecutePipeline",
+        "dependsOn": [
+          {
+            "activity": "Ejecutar_Ingesta_Bronze",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "pipeline": {
+            "referenceName": "PL_Limpieza_Silver",
+            "type": "PipelineReference"
+          },
+          "waitOnCompletion": true
+        }
+      },
+      {
+        "name": "Ejecutar_Vistas_Gold",
+        "type": "ExecutePipeline",
+        "dependsOn": [
+          {
+            "activity": "Ejecutar_Limpieza_Silver",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "pipeline": {
+            "referenceName": "PL_Vistas_Gold",
+            "type": "PipelineReference"
+          },
+          "waitOnCompletion": true
+        }
+      },
+      {
+        "name": "Ejecutar_Calidad_Datos",
+        "type": "ExecutePipeline",
+        "dependsOn": [
+          {
+            "activity": "Ejecutar_Vistas_Gold",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "policy": {
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "pipeline": {
+            "referenceName": "PL_Calidad_Datos",
+            "type": "PipelineReference"
+          },
+          "waitOnCompletion": true
+        }
+      }
+    ],
+    "concurrency": 1,
+    "annotations": []
+  },
+  "type": "Microsoft.DataFactory/factories/pipelines"
+}

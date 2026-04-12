@@ -88,7 +88,7 @@ def main():
 
     if not env.get("SQLSERVER_PASSWORD"):
         logger.error("La variable SQLSERVER_PASSWORD no esta definida.")
-        logger.error("Ejecuta:  $env:SQLSERVER_PASSWORD='RetailMax@2026Data'")
+        logger.error("Ejecuta:  $env:SQLSERVER_PASSWORD='<tu_password>'")
         sys.exit(1)
 
     resultados = []

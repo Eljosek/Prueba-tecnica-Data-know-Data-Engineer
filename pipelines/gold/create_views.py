@@ -8,10 +8,10 @@ import sys
 import pyodbc
 from datetime import datetime
 
-SERVER   = "sqlsrv-retailmax-brs-dev.database.windows.net"
+SERVER   = os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net")
 DATABASE = "sqldb-retailmax-brs-dev"
 USER     = os.environ.get("SQLSERVER_USER", "sqladmin")
-PASSWORD = os.environ.get("SQLSERVER_PASSWORD", "RetailMax@2026Data")
+PASSWORD = os.environ.get("SQLSERVER_PASSWORD")
 
 CONN_STR = (
     f"DRIVER={{SQL Server}};"
