@@ -1,33 +1,41 @@
 """
 deploy_rbac.py
 Fase 5 - Gobierno y Seguridad
-Configura los tres roles RBAC requeridos sobre los recursos de RetailMax:
+Configura los tres roles RBAC requeridos sobre los recursos de RetailMax
+asignando los permisos a **grupos de Azure Active Directory** (no a usuarios
+individuales), lo que permite administrar el acceso mediante membresia de grupo.
 
-  Rol 1 - Ingeniero de Datos:
+Grupos AAD creados (object IDs fijos para rg-retailmax-brs-dev):
+  RetailMax - Ingeniero de Datos  : 1f99d6a6-3a64-4048-8a75-2db0c2195794
+  RetailMax - Analista de Datos   : b02b1fe4-b973-4f9d-8d98-38375734b0a7
+  RetailMax - Administrador       : 1e3eff3d-e0ec-4788-a49a-ad6815bc8bdd
+
+  Rol 1 - RetailMax - Ingeniero de Datos:
     Storage Blob Data Contributor sobre contenedores bronze, silver y gold.
     Contributor sobre el Azure SQL Database.
 
-  Rol 2 - Analista de Datos:
+  Rol 2 - RetailMax - Analista de Datos:
     Storage Blob Data Reader unicamente sobre el contenedor gold.
-    db_datareader sobre el Azure SQL Database (rol de BD).
+    Acceso denegado por diseno a bronze y silver.
 
-  Rol 3 - Administrador:
+  Rol 3 - RetailMax - Administrador:
     Owner sobre el resource group completo.
 
-Requisito: los IDs de objeto (object_id) de los usuarios/grupos deben
+Requisito: los IDs de objeto (object_id) de los GRUPOS AAD deben
 pasarse como variables de entorno antes de ejecutar el script.
+Por defecto se usan los IDs de los grupos pre-creados arriba.
 
 Variables de entorno requeridas:
   SQLSERVER_PASSWORD          - contrasena del servidor SQL
-  RG_INGENIERO_OBJECT_ID      - object_id AAD del usuario Ingeniero de Datos
-  RG_ANALISTA_OBJECT_ID       - object_id AAD del usuario Analista de Datos
-  RG_ADMINISTRADOR_OBJECT_ID  - object_id AAD del usuario Administrador
+  RG_INGENIERO_OBJECT_ID      - object_id del grupo Ingeniero de Datos
+  RG_ANALISTA_OBJECT_ID       - object_id del grupo Analista de Datos
+  RG_ADMINISTRADOR_OBJECT_ID  - object_id del grupo Administrador
 
 Uso:
   $env:SQLSERVER_PASSWORD="..."
-  $env:RG_INGENIERO_OBJECT_ID="<guid>"
-  $env:RG_ANALISTA_OBJECT_ID="<guid>"
-  $env:RG_ADMINISTRADOR_OBJECT_ID="<guid>"
+  $env:RG_INGENIERO_OBJECT_ID="1f99d6a6-3a64-4048-8a75-2db0c2195794"
+  $env:RG_ANALISTA_OBJECT_ID="b02b1fe4-b973-4f9d-8d98-38375734b0a7"
+  $env:RG_ADMINISTRADOR_OBJECT_ID="1e3eff3d-e0ec-4788-a49a-ad6815bc8bdd"
   python orchestration/deploy_rbac.py
 """
 import os
@@ -46,6 +54,11 @@ RESOURCE_GROUP     = "rg-retailmax-brs-dev"
 STORAGE_ACCOUNT    = "stgretailmaxbrsdev"
 TENANT_ID          = "6f716858-c5ea-4ced-8eb4-417b305f7c49"
 
+# IDs de grupos AAD pre-creados (valores por defecto)
+_DEFAULT_INGENIERO_OID    = "1f99d6a6-3a64-4048-8a75-2db0c2195794"
+_DEFAULT_ANALISTA_OID     = "b02b1fe4-b973-4f9d-8d98-38375734b0a7"
+_DEFAULT_ADMINISTRADOR_OID = "1e3eff3d-e0ec-4788-a49a-ad6815bc8bdd"
+
 # IDs de roles integrados de Azure RBAC
 ROLE_STORAGE_BLOB_DATA_CONTRIBUTOR = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
 ROLE_STORAGE_BLOB_DATA_READER      = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
@@ -55,9 +68,9 @@ ROLE_OWNER                         = "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
 # ---------------------------------------------------------------------------
 # Carga de object_ids desde variables de entorno
 # ---------------------------------------------------------------------------
-INGENIERO_OID     = os.environ.get("RG_INGENIERO_OBJECT_ID", "")
-ANALISTA_OID      = os.environ.get("RG_ANALISTA_OBJECT_ID", "")
-ADMIN_OID         = os.environ.get("RG_ADMINISTRADOR_OBJECT_ID", "")
+INGENIERO_OID     = os.environ.get("RG_INGENIERO_OBJECT_ID", _DEFAULT_INGENIERO_OID)
+ANALISTA_OID      = os.environ.get("RG_ANALISTA_OBJECT_ID", _DEFAULT_ANALISTA_OID)
+ADMIN_OID         = os.environ.get("RG_ADMINISTRADOR_OBJECT_ID", _DEFAULT_ADMINISTRADOR_OID)
 
 if not all([INGENIERO_OID, ANALISTA_OID, ADMIN_OID]):
     print(
@@ -106,7 +119,7 @@ def asignar_rol(
         parameters={
             "roleDefinitionId": f"{role_def_scope}/providers/Microsoft.Authorization/roleDefinitions/{role_definition_id}",
             "principalId": principal_id,
-            "principalType": "User",
+            "principalType": "Group",
         },
     )
     print(f"    [OK] {descripcion}")

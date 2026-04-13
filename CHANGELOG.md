@@ -11,6 +11,26 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.1] — 2026-04-13
+
+### Changed
+- `orchestration/deploy_rbac.py` — refactorizado para asignar roles a **grupos AAD**
+  en lugar de usuarios individuales. `principalType` cambiado de `"User"` a `"Group"`.
+  IDs de grupos pre-creados definidos como constantes por defecto:
+  `RetailMax - Ingeniero de Datos`, `RetailMax - Analista de Datos`,
+  `RetailMax - Administrador`.
+
+### Added
+- Tres grupos Azure Active Directory creados manualmente:
+  - `RetailMax - Ingeniero de Datos` (ID: `1f99d6a6-3a64-4048-8a75-2db0c2195794`)
+  - `RetailMax - Analista de Datos` (ID: `b02b1fe4-b973-4f9d-8d98-38375734b0a7`)
+  - `RetailMax - Administrador` (ID: `1e3eff3d-e0ec-4788-a49a-ad6815bc8bdd`)
+- 6 role assignments aplicados sobre los grupos AAD (Storage Blob Contributor×3,
+  SQL Contributor, Storage Blob Reader, Owner RG). Visibles en Azure IAM con
+  nombre de grupo descriptivo.
+
+---
+
 ## [1.0.0] — 2026-04-13
 
 ### Fixed
