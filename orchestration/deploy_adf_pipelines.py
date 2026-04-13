@@ -46,7 +46,8 @@ SUBSCRIPTION_ID = "64b1483b-b4aa-4a3b-bd59-e11ab2672810"
 RESOURCE_GROUP = "rg-retailmax-brs-dev"
 FACTORY_NAME = "adf-retailmax-brs-dev"
 
-SQL_SERVER = os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net")
+SQL_SERVER = os.environ.get("SQLSERVER_HOST",
+                            "sqlsrv-retailmax-brs-dev.database.windows.net")
 SQL_DATABASE = os.environ.get("SQLSERVER_DB", "sqldb-retailmax-brs-dev")
 SQL_USER = os.environ.get("SQLSERVER_USER", "sqladmin")
 SQL_PASSWORD = os.environ.get("SQLSERVER_PASSWORD", "")
@@ -742,7 +743,8 @@ def main():
     print(f"    - PL_Calidad_Datos")
     print(f"    - PL_Orquestador_Maestro")
     print(f"  Trigger: Trigger_Diario_0200 (02:00 AM UTC)")
-    print(f"\n  URL: https://adf.azure.com/en/authoring/pipeline/PL_Orquestador_Maestro?factory=%2Fsubscriptions%2F{SUBSCRIPTION_ID}%2FresourceGroups%2F{RESOURCE_GROUP}%2Fproviders%2FMicrosoft.DataFactory%2Ffactories%2F{FACTORY_NAME}")
+    print(
+        f"\n  URL: https://adf.azure.com/en/authoring/pipeline/PL_Orquestador_Maestro?factory=%2Fsubscriptions%2F{SUBSCRIPTION_ID}%2FresourceGroups%2F{RESOURCE_GROUP}%2Fproviders%2FMicrosoft.DataFactory%2Ffactories%2F{FACTORY_NAME}")
 
 
 if __name__ == "__main__":

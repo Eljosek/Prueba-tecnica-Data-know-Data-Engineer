@@ -19,7 +19,8 @@ import pyodbc
 # -----------------------------------------------------------------------
 # Configuracion de conexion
 # -----------------------------------------------------------------------
-SQL_SERVER = os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net")
+SQL_SERVER = os.environ.get("SQLSERVER_HOST",
+                            "sqlsrv-retailmax-brs-dev.database.windows.net")
 SQL_DATABASE = os.environ.get("SQLSERVER_DB", "sqldb-retailmax-brs-dev")
 SQL_USER = os.environ.get("SQLSERVER_USER", "sqladmin")
 SQL_PASSWORD = os.environ.get("SQLSERVER_PASSWORD", "")
@@ -63,14 +64,14 @@ def test_no_nulls_pks(cursor):
     """
     nombre = "test_no_nulls_pks"
     checks = {
-        "dim_productos.product_id":      "SELECT COUNT(*) FROM dim_productos WHERE product_id IS NULL",
-        "dim_tiendas.store_id":          "SELECT COUNT(*) FROM dim_tiendas WHERE store_id IS NULL",
-        "dim_clientes.customer_id":      "SELECT COUNT(*) FROM dim_clientes WHERE customer_id IS NULL",
-        "fact_ventas.sale_id":           "SELECT COUNT(*) FROM fact_ventas WHERE sale_id IS NULL",
-        "fact_inventario.inventory_id":  "SELECT COUNT(*) FROM fact_inventario WHERE inventory_id IS NULL",
-        "fact_devoluciones.return_id":   "SELECT COUNT(*) FROM fact_devoluciones WHERE return_id IS NULL",
+        "dim_productos.product_id": "SELECT COUNT(*) FROM dim_productos WHERE product_id IS NULL",
+        "dim_tiendas.store_id": "SELECT COUNT(*) FROM dim_tiendas WHERE store_id IS NULL",
+        "dim_clientes.customer_id": "SELECT COUNT(*) FROM dim_clientes WHERE customer_id IS NULL",
+        "fact_ventas.sale_id": "SELECT COUNT(*) FROM fact_ventas WHERE sale_id IS NULL",
+        "fact_inventario.inventory_id": "SELECT COUNT(*) FROM fact_inventario WHERE inventory_id IS NULL",
+        "fact_devoluciones.return_id": "SELECT COUNT(*) FROM fact_devoluciones WHERE return_id IS NULL",
         "fact_rfm_clientes.customer_id": "SELECT COUNT(*) FROM fact_rfm_clientes WHERE customer_id IS NULL",
-        "kpi_ejecutivo.fecha":           "SELECT COUNT(*) FROM kpi_ejecutivo WHERE fecha IS NULL",
+        "kpi_ejecutivo.fecha": "SELECT COUNT(*) FROM kpi_ejecutivo WHERE fecha IS NULL",
     }
     errores = []
     for campo, sql in checks.items():
@@ -89,9 +90,9 @@ def test_fechas_validas(cursor):
     """
     nombre = "test_fechas_validas"
     checks = {
-        "fact_ventas.sale_date":           "SELECT COUNT(*) FROM fact_ventas WHERE sale_date > CAST(GETDATE() AS DATE)",
-        "fact_inventario.snapshot_date":   "SELECT COUNT(*) FROM fact_inventario WHERE snapshot_date > CAST(GETDATE() AS DATE)",
-        "fact_devoluciones.return_date":   "SELECT COUNT(*) FROM fact_devoluciones WHERE return_date > CAST(GETDATE() AS DATE)",
+        "fact_ventas.sale_date": "SELECT COUNT(*) FROM fact_ventas WHERE sale_date > CAST(GETDATE() AS DATE)",
+        "fact_inventario.snapshot_date": "SELECT COUNT(*) FROM fact_inventario WHERE snapshot_date > CAST(GETDATE() AS DATE)",
+        "fact_devoluciones.return_date": "SELECT COUNT(*) FROM fact_devoluciones WHERE return_date > CAST(GETDATE() AS DATE)",
     }
     errores = []
     for campo, sql in checks.items():
@@ -171,18 +172,18 @@ def test_ventas_netas_positivas(cursor):
 def registrar_volumetria(cursor):
     """Muestra un resumen de filas por tabla Gold para control de volumetria."""
     tablas = [
-        ("dim_productos",      "SELECT COUNT(*) FROM dim_productos"),
-        ("dim_tiendas",        "SELECT COUNT(*) FROM dim_tiendas"),
-        ("dim_clientes",       "SELECT COUNT(*) FROM dim_clientes"),
-        ("fact_ventas",        "SELECT COUNT(*) FROM fact_ventas"),
-        ("fact_inventario",    "SELECT COUNT(*) FROM fact_inventario"),
-        ("fact_devoluciones",  "SELECT COUNT(*) FROM fact_devoluciones"),
-        ("fact_rfm_clientes",  "SELECT COUNT(*) FROM fact_rfm_clientes"),
-        ("kpi_ejecutivo",      "SELECT COUNT(*) FROM kpi_ejecutivo"),
+        ("dim_productos", "SELECT COUNT(*) FROM dim_productos"),
+        ("dim_tiendas", "SELECT COUNT(*) FROM dim_tiendas"),
+        ("dim_clientes", "SELECT COUNT(*) FROM dim_clientes"),
+        ("fact_ventas", "SELECT COUNT(*) FROM fact_ventas"),
+        ("fact_inventario", "SELECT COUNT(*) FROM fact_inventario"),
+        ("fact_devoluciones", "SELECT COUNT(*) FROM fact_devoluciones"),
+        ("fact_rfm_clientes", "SELECT COUNT(*) FROM fact_rfm_clientes"),
+        ("kpi_ejecutivo", "SELECT COUNT(*) FROM kpi_ejecutivo"),
     ]
     print("\nVolometria de vistas Gold:")
     print(f"  {'Vista':<25} {'Registros':>12}")
-    print(f"  {'-'*25} {'-'*12}")
+    print(f"  {'-' * 25} {'-' * 12}")
     for nombre, sql in tablas:
         try:
             filas = ejecutar_query(cursor, sql)
@@ -211,11 +212,11 @@ def main():
     cursor = conn.cursor()
 
     pruebas = [
-        ("Test 1: PKs sin nulos",               test_no_nulls_pks),
-        ("Test 2: Fechas validas",               test_fechas_validas),
-        ("Test 3: Stock no negativo",            test_stock_no_negativo),
-        ("Test 4: Formato segmentos RFM",        test_rfm_segmentos),
-        ("Test 5: Ventas netas positivas",       test_ventas_netas_positivas),
+        ("Test 1: PKs sin nulos", test_no_nulls_pks),
+        ("Test 2: Fechas validas", test_fechas_validas),
+        ("Test 3: Stock no negativo", test_stock_no_negativo),
+        ("Test 4: Formato segmentos RFM", test_rfm_segmentos),
+        ("Test 5: Ventas netas positivas", test_ventas_netas_positivas),
     ]
 
     resultados = []
@@ -240,7 +241,8 @@ def main():
     print("\n" + "=" * 60)
     print(f"Resultado: {pasadas}/{len(resultados)} pruebas pasadas")
     if falladas:
-        print(f"ADVERTENCIA: {falladas} prueba(s) fallaron. Revisar datos en capa Gold.")
+        print(
+            f"ADVERTENCIA: {falladas} prueba(s) fallaron. Revisar datos en capa Gold.")
     else:
         print("Todas las pruebas de calidad pasaron correctamente.")
     print("=" * 60)

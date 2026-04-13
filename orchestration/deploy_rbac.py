@@ -49,28 +49,32 @@ from azure.mgmt.storage import StorageManagementClient
 # ---------------------------------------------------------------------------
 # Configuracion
 # ---------------------------------------------------------------------------
-SUBSCRIPTION_ID    = "64b1483b-b4aa-4a3b-bd59-e11ab2672810"
-RESOURCE_GROUP     = "rg-retailmax-brs-dev"
-STORAGE_ACCOUNT    = "stgretailmaxbrsdev"
-TENANT_ID          = "6f716858-c5ea-4ced-8eb4-417b305f7c49"
+SUBSCRIPTION_ID = "64b1483b-b4aa-4a3b-bd59-e11ab2672810"
+RESOURCE_GROUP = "rg-retailmax-brs-dev"
+STORAGE_ACCOUNT = "stgretailmaxbrsdev"
+TENANT_ID = "6f716858-c5ea-4ced-8eb4-417b305f7c49"
 
 # IDs de grupos AAD pre-creados (valores por defecto)
-_DEFAULT_INGENIERO_OID    = "1f99d6a6-3a64-4048-8a75-2db0c2195794"
-_DEFAULT_ANALISTA_OID     = "b02b1fe4-b973-4f9d-8d98-38375734b0a7"
+_DEFAULT_INGENIERO_OID = "1f99d6a6-3a64-4048-8a75-2db0c2195794"
+_DEFAULT_ANALISTA_OID = "b02b1fe4-b973-4f9d-8d98-38375734b0a7"
 _DEFAULT_ADMINISTRADOR_OID = "1e3eff3d-e0ec-4788-a49a-ad6815bc8bdd"
 
 # IDs de roles integrados de Azure RBAC
 ROLE_STORAGE_BLOB_DATA_CONTRIBUTOR = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
-ROLE_STORAGE_BLOB_DATA_READER      = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
-ROLE_CONTRIBUTOR                   = "b24988ac-6180-42a0-ab88-20f7382dd24c"
-ROLE_OWNER                         = "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+ROLE_STORAGE_BLOB_DATA_READER = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+ROLE_CONTRIBUTOR = "b24988ac-6180-42a0-ab88-20f7382dd24c"
+ROLE_OWNER = "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
 
 # ---------------------------------------------------------------------------
 # Carga de object_ids desde variables de entorno
 # ---------------------------------------------------------------------------
-INGENIERO_OID     = os.environ.get("RG_INGENIERO_OBJECT_ID", _DEFAULT_INGENIERO_OID)
-ANALISTA_OID      = os.environ.get("RG_ANALISTA_OBJECT_ID", _DEFAULT_ANALISTA_OID)
-ADMIN_OID         = os.environ.get("RG_ADMINISTRADOR_OBJECT_ID", _DEFAULT_ADMINISTRADOR_OID)
+INGENIERO_OID = os.environ.get(
+    "RG_INGENIERO_OBJECT_ID",
+    _DEFAULT_INGENIERO_OID)
+ANALISTA_OID = os.environ.get("RG_ANALISTA_OBJECT_ID", _DEFAULT_ANALISTA_OID)
+ADMIN_OID = os.environ.get(
+    "RG_ADMINISTRADOR_OBJECT_ID",
+    _DEFAULT_ADMINISTRADOR_OID)
 
 if not all([INGENIERO_OID, ANALISTA_OID, ADMIN_OID]):
     print(
@@ -85,8 +89,10 @@ if not all([INGENIERO_OID, ANALISTA_OID, ADMIN_OID]):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def scope_rg() -> str:
     return f"/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}"
+
 
 def scope_container(container: str) -> str:
     return (
@@ -96,6 +102,7 @@ def scope_container(container: str) -> str:
         f"/blobServices/default/containers/{container}"
     )
 
+
 def scope_sql_server() -> str:
     return (
         f"/subscriptions/{SUBSCRIPTION_ID}"
@@ -103,6 +110,7 @@ def scope_sql_server() -> str:
         f"/providers/Microsoft.Sql/servers/sqlsrv-retailmax-brs-dev"
         f"/databases/sqldb-retailmax-brs-dev"
     )
+
 
 def asignar_rol(
     auth_client: AuthorizationManagementClient,
@@ -141,7 +149,8 @@ def main() -> None:
     # mas acceso Contributor al SQL Database.
     # -----------------------------------------------------------------------
     print(f"\n[2/2] Asignando roles...")
-    print(f"\n  --- Rol: Ingeniero de Datos (object_id: {INGENIERO_OID[:8]}...) ---")
+    print(
+        f"\n  --- Rol: Ingeniero de Datos (object_id: {INGENIERO_OID[:8]}...) ---")
     for container in ["bronze", "silver", "gold"]:
         asignar_rol(
             auth_client,
@@ -162,7 +171,8 @@ def main() -> None:
     # ROL 2 - Analista de Datos
     # Solo lectura sobre capa Gold. Sin acceso a bronze ni silver.
     # -----------------------------------------------------------------------
-    print(f"\n  --- Rol: Analista de Datos (object_id: {ANALISTA_OID[:8]}...) ---")
+    print(
+        f"\n  --- Rol: Analista de Datos (object_id: {ANALISTA_OID[:8]}...) ---")
     asignar_rol(
         auth_client,
         scope_container("gold"),
@@ -170,7 +180,8 @@ def main() -> None:
         ANALISTA_OID,
         "Storage Blob Data Reader -> gold (unico contenedor permitido)",
     )
-    # Sin asignacion sobre bronze o silver: el acceso queda denegado por defecto.
+    # Sin asignacion sobre bronze o silver: el acceso queda denegado por
+    # defecto.
     print("    [INFO] bronze: acceso denegado (sin asignacion)")
     print("    [INFO] silver: acceso denegado (sin asignacion)")
 

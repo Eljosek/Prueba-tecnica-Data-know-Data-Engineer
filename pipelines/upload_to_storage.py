@@ -22,7 +22,8 @@ LAYERS = {
 CONN_STR = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
 
 
-def upload_layer(client: BlobServiceClient, layer: str, local_root: Path) -> dict:
+def upload_layer(client: BlobServiceClient, layer: str,
+                 local_root: Path) -> dict:
     container = client.get_container_client(layer)
     parquet_files = list(local_root.rglob("*.parquet"))
 
@@ -31,7 +32,7 @@ def upload_layer(client: BlobServiceClient, layer: str, local_root: Path) -> dic
         return {"layer": layer, "uploaded": 0, "errors": 0}
 
     uploaded = 0
-    errors   = 0
+    errors = 0
 
     for local_path in parquet_files:
         # Blob path relativa: ej. TRANS_VENTAS/2026/04/11/part0.parquet
@@ -56,7 +57,8 @@ def main():
     if not CONN_STR:
         print("ERROR: la variable AZURE_STORAGE_CONNECTION_STRING no esta definida.")
         print("Obtenla desde Azure Portal:")
-        print("  Storage accounts -> stgretailmaxbrsdev -> Access keys -> Connection string")
+        print(
+            "  Storage accounts -> stgretailmaxbrsdev -> Access keys -> Connection string")
         print('\nEjemplo de uso:')
         print('  $env:AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;..."')
         print('  python upload_to_storage.py')
@@ -89,10 +91,14 @@ def main():
     print("\n" + "=" * 60)
     print("Resumen")
     print("=" * 60)
-    total_up  = sum(r["uploaded"] for r in resumen)
-    total_err = sum(r["errors"]   for r in resumen)
+    total_up = sum(r["uploaded"] for r in resumen)
+    total_err = sum(r["errors"] for r in resumen)
     for r in resumen:
-        print(f"  {r['layer']:<8} subidos={r['uploaded']}  errores={r['errors']}")
+        print(
+            f"  {
+                r['layer']:<8} subidos={
+                r['uploaded']}  errores={
+                r['errors']}")
     print(f"\n  Total archivos subidos: {total_up}")
     print(f"  Total errores         : {total_err}")
 

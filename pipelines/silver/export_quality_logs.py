@@ -12,11 +12,11 @@ from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 
 DB_CONFIG = {
-    "server":   os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net"),
+    "server": os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net"),
     "database": "sqldb-retailmax-brs-dev",
-    "user":     os.environ.get("SQLSERVER_USER", "sqladmin"),
+    "user": os.environ.get("SQLSERVER_USER", "sqladmin"),
     "password": os.environ.get("SQLSERVER_PASSWORD"),
-    "driver":   "SQL Server",
+    "driver": "SQL Server",
 }
 
 STORAGE_CONN = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
@@ -38,7 +38,8 @@ def main():
     conn = pyodbc.connect(conn_str)
 
     # Reporte de calidad
-    df_quality = pd.read_sql("SELECT * FROM pipeline_quality_report ORDER BY timestamp_reporte DESC", conn)
+    df_quality = pd.read_sql(
+        "SELECT * FROM pipeline_quality_report ORDER BY timestamp_reporte DESC", conn)
 
     # Errores del pipeline
     df_errors = pd.read_sql("SELECT TOP 100 * FROM pipeline_errors", conn)
@@ -46,7 +47,7 @@ def main():
     conn.close()
 
     blob_client = BlobServiceClient.from_connection_string(STORAGE_CONN)
-    container   = blob_client.get_container_client("silver")
+    container = blob_client.get_container_client("silver")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -57,7 +58,8 @@ def main():
         data=quality_csv,
         overwrite=True,
     )
-    print(f"  [OK] silver/logs/quality_report_{timestamp}.csv ({len(df_quality)} registros)")
+    print(
+        f"  [OK] silver/logs/quality_report_{timestamp}.csv ({len(df_quality)} registros)")
 
     # Subir errors log
     errors_csv = df_errors.to_csv(index=False)
@@ -66,7 +68,8 @@ def main():
         data=errors_csv,
         overwrite=True,
     )
-    print(f"  [OK] silver/logs/pipeline_errors_{timestamp}.csv ({len(df_errors)} registros)")
+    print(
+        f"  [OK] silver/logs/pipeline_errors_{timestamp}.csv ({len(df_errors)} registros)")
 
     # Subir tambien al bronze
     container_bronze = blob_client.get_container_client("bronze")

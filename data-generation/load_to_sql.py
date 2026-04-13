@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 load_to_sql.py - Carga de datos CSV a Azure SQL Database
 Proyecto: RetailMax - Data Platform
@@ -22,38 +22,48 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Conexion ----------------------------------------------------------------
-SERVER   = "sqlsrv-retailmax-brs-dev.database.windows.net"
+SERVER = "sqlsrv-retailmax-brs-dev.database.windows.net"
 DATABASE = "sqldb-retailmax-brs-dev"
 
 # --- Tablas a cargar (orden respeta dependencias implicitas) -----------------
 TABLAS = [
-    {"nombre": "MSTR_PROVEEDORES",  "archivo": "MSTR_PROVEEDORES.csv",  "chunksize": 5_000},
-    {"nombre": "MSTR_TIENDAS",      "archivo": "MSTR_TIENDAS.csv",      "chunksize": 5_000},
-    {"nombre": "MSTR_ARTICULOS",    "archivo": "MSTR_ARTICULOS.csv",    "chunksize": 5_000},
-    {"nombre": "CRM_MIEMBROS",      "archivo": "CRM_MIEMBROS.csv",      "chunksize": 5_000},
-    {"nombre": "TRANS_VENTAS",      "archivo": "TRANS_VENTAS.csv",      "chunksize": 10_000},
-    {"nombre": "INV_STOCK_DIARIO",  "archivo": "INV_STOCK_DIARIO.csv",  "chunksize": 10_000},
-    {"nombre": "POST_DEVOLUCIONES", "archivo": "POST_DEVOLUCIONES.csv", "chunksize": 5_000},
+    {"nombre": "MSTR_PROVEEDORES",
+     "archivo": "MSTR_PROVEEDORES.csv",
+     "chunksize": 5_000},
+    {"nombre": "MSTR_TIENDAS", "archivo": "MSTR_TIENDAS.csv", "chunksize": 5_000},
+    {"nombre": "MSTR_ARTICULOS",
+     "archivo": "MSTR_ARTICULOS.csv",
+     "chunksize": 5_000},
+    {"nombre": "CRM_MIEMBROS", "archivo": "CRM_MIEMBROS.csv", "chunksize": 5_000},
+    {"nombre": "TRANS_VENTAS", "archivo": "TRANS_VENTAS.csv", "chunksize": 10_000},
+    {"nombre": "INV_STOCK_DIARIO",
+     "archivo": "INV_STOCK_DIARIO.csv",
+     "chunksize": 10_000},
+    {"nombre": "POST_DEVOLUCIONES",
+     "archivo": "POST_DEVOLUCIONES.csv",
+     "chunksize": 5_000},
 ]
 
 CONTEOS_ESPERADOS = {
-    "MSTR_PROVEEDORES":    800,
-    "MSTR_TIENDAS":        150,
-    "MSTR_ARTICULOS":    5_000,
-    "CRM_MIEMBROS":     50_000,
-    "TRANS_VENTAS":  1_000_000,
+    "MSTR_PROVEEDORES": 800,
+    "MSTR_TIENDAS": 150,
+    "MSTR_ARTICULOS": 5_000,
+    "CRM_MIEMBROS": 50_000,
+    "TRANS_VENTAS": 1_000_000,
     "INV_STOCK_DIARIO": 750_000,
-    "POST_DEVOLUCIONES":  50_000,
+    "POST_DEVOLUCIONES": 50_000,
 }
 
 
 def validar_env():
-    usuario  = os.environ.get("SQLSERVER_USER")
+    usuario = os.environ.get("SQLSERVER_USER")
     password = os.environ.get("SQLSERVER_PASSWORD")
     if not usuario:
-        raise EnvironmentError("Variable de entorno SQLSERVER_USER no definida.")
+        raise EnvironmentError(
+            "Variable de entorno SQLSERVER_USER no definida.")
     if not password:
-        raise EnvironmentError("Variable de entorno SQLSERVER_PASSWORD no definida.")
+        raise EnvironmentError(
+            "Variable de entorno SQLSERVER_PASSWORD no definida.")
     return usuario, password
 
 
@@ -66,7 +76,9 @@ def crear_conexion(usuario: str, password: str) -> pyodbc.Connection:
     disponibles = set(pyodbc.drivers())
     driver = next((d for d in drivers_pref if d in disponibles), None)
     if not driver:
-        raise RuntimeError(f"No se encontro driver ODBC compatible. Disponibles: {list(disponibles)}")
+        raise RuntimeError(
+            f"No se encontro driver ODBC compatible. Disponibles: {
+                list(disponibles)}")
 
     logger.info(f"Driver ODBC      : {driver}")
     conn_str = (
@@ -107,7 +119,8 @@ def preparar_tabla(conn: pyodbc.Connection, nombre: str, df: pd.DataFrame):
     cursor.execute(
         f"IF OBJECT_ID(N'dbo.[{nombre}]', N'U') IS NOT NULL DROP TABLE dbo.[{nombre}]"
     )
-    cols_ddl = ", ".join(f"[{col}] {inferir_tipo_sql(df[col])} NULL" for col in df.columns)
+    cols_ddl = ", ".join(
+        f"[{col}] {inferir_tipo_sql(df[col])} NULL" for col in df.columns)
     cursor.execute(f"CREATE TABLE dbo.[{nombre}] ({cols_ddl})")
     conn.commit()
     logger.info(f"  Tabla dbo.[{nombre}] creada ({len(df.columns)} columnas)")
@@ -120,7 +133,8 @@ def normalizar_df(df: pd.DataFrame) -> pd.DataFrame:
         elif pd.api.types.is_float_dtype(df[col]):
             df[col] = df[col].astype(object).where(df[col].notnull(), None)
         elif pd.api.types.is_integer_dtype(df[col]):
-            # convierte enteros a Python int para evitar np.int64 que pyodbc puede rechazar
+            # convierte enteros a Python int para evitar np.int64 que pyodbc
+            # puede rechazar
             df[col] = df[col].astype(object)
         else:
             df[col] = df[col].astype(object).where(df[col].notnull(), None)
@@ -137,19 +151,20 @@ def cargar_tabla(
     preparar_tabla(conn, nombre, df)
     df = normalizar_df(df)
 
-    cols_sql   = ", ".join(f"[{c}]" for c in df.columns)
-    marks      = ", ".join("?" for _ in df.columns)
+    cols_sql = ", ".join(f"[{c}]" for c in df.columns)
+    marks = ", ".join("?" for _ in df.columns)
     insert_sql = f"INSERT INTO dbo.[{nombre}] ({cols_sql}) VALUES ({marks})"
 
     cursor = conn.cursor()
     cursor.fast_executemany = True
 
-    total    = len(df)
+    total = len(df)
     cargados = 0
 
     for inicio in range(0, total, chunksize):
-        chunk  = df.iloc[inicio : inicio + chunksize]
-        params = [list(row) for row in chunk.itertuples(index=False, name=None)]
+        chunk = df.iloc[inicio: inicio + chunksize]
+        params = [list(row)
+                  for row in chunk.itertuples(index=False, name=None)]
         cursor.executemany(insert_sql, params)
         conn.commit()
         cargados += len(chunk)
@@ -168,8 +183,8 @@ def verificar_conteos(conn: pyodbc.Connection):
     ok = True
     for tabla, esperado in CONTEOS_ESPERADOS.items():
         cursor.execute(f"SELECT COUNT(*) FROM dbo.[{tabla}]")
-        real  = cursor.fetchone()[0]
-        diff  = abs(real - esperado)
+        real = cursor.fetchone()[0]
+        diff = abs(real - esperado)
         estado = "OK" if diff <= esperado * 0.01 else "DIFERENCIA"
         logger.info(
             f"  {tabla:<25} esperado={esperado:>9,}  real={real:>9,}  {estado}"
@@ -200,13 +215,13 @@ def main():
     logger.info(f"Directorio de datos: {directorio}")
 
     inicio_total = datetime.now()
-    resultados   = {}
-    errores      = []
+    resultados = {}
+    errores = []
 
     for cfg in TABLAS:
         nombre = cfg["nombre"]
-        ruta   = directorio / cfg["archivo"]
-        chunk  = cfg["chunksize"]
+        ruta = directorio / cfg["archivo"]
+        chunk = cfg["chunksize"]
 
         if not ruta.exists():
             logger.warning(f"  OMITIDA - Archivo no encontrado: {ruta}")
@@ -214,9 +229,10 @@ def main():
 
         t0 = datetime.now()
         try:
-            filas   = cargar_tabla(conn, nombre, ruta, chunk)
+            filas = cargar_tabla(conn, nombre, ruta, chunk)
             elapsed = (datetime.now() - t0).total_seconds()
-            logger.info(f"  Tiempo: {elapsed:.1f}s  ({filas/max(elapsed,0.1):,.0f} filas/s)")
+            logger.info(
+                f"  Tiempo: {elapsed:.1f}s  ({filas / max(elapsed, 0.1):,.0f} filas/s)")
             resultados[nombre] = filas
         except Exception as exc:
             logger.error(f"Error al cargar {nombre}: {exc}", exc_info=True)

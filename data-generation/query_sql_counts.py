@@ -5,6 +5,7 @@ import sys
 import pyodbc
 from datetime import datetime
 
+
 def get_credentials():
     usuario = os.environ.get("SQLSERVER_USER")
     password = os.environ.get("SQLSERVER_PASSWORD")
@@ -13,6 +14,7 @@ def get_credentials():
             "Debe definir las variables de entorno SQLSERVER_USER y SQLSERVER_PASSWORD."
         )
     return usuario, password
+
 
 SERVER = "sqlsrv-retailmax-brs-dev.database.windows.net"
 DATABASE = "sqldb-retailmax-brs-dev"
@@ -46,7 +48,8 @@ def get_driver():
     for driver in preferred:
         if driver in available:
             return driver
-    raise RuntimeError(f"No se encontro driver ODBC compatible. Drivers disponibles: {available}")
+    raise RuntimeError(
+        f"No se encontro driver ODBC compatible. Drivers disponibles: {available}")
 
 
 def create_connection(user, password):

@@ -12,16 +12,16 @@ from datetime import datetime
 
 from azure.storage.blob import BlobServiceClient
 
-BASE_DIR     = Path(__file__).resolve().parent
-GOLD_DATA    = BASE_DIR / "data"
-CONTAINER    = "gold"
+BASE_DIR = Path(__file__).resolve().parent
+GOLD_DATA = BASE_DIR / "data"
+CONTAINER = "gold"
 
 DB_CONFIG = {
-    "server":   os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net"),
+    "server": os.environ.get("SQLSERVER_HOST", "sqlsrv-retailmax-brs-dev.database.windows.net"),
     "database": "sqldb-retailmax-brs-dev",
-    "user":     os.environ.get("SQLSERVER_USER", "sqladmin"),
+    "user": os.environ.get("SQLSERVER_USER", "sqladmin"),
     "password": os.environ.get("SQLSERVER_PASSWORD"),
-    "driver":   "SQL Server",
+    "driver": "SQL Server",
 }
 
 STORAGE_CONN = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
@@ -67,16 +67,16 @@ def export_and_upload():
 
     try:
         blob_client = BlobServiceClient.from_connection_string(STORAGE_CONN)
-        container   = blob_client.get_container_client(CONTAINER)
+        container = blob_client.get_container_client(CONTAINER)
         print("Conexion Azure Storage establecida\n")
     except Exception as e:
         print(f"ERROR Storage: {e}")
         sys.exit(1)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    year      = datetime.now().strftime("%Y")
-    month     = datetime.now().strftime("%m")
-    day       = datetime.now().strftime("%d")
+    year = datetime.now().strftime("%Y")
+    month = datetime.now().strftime("%m")
+    day = datetime.now().strftime("%d")
 
     resultados = []
 
@@ -106,7 +106,7 @@ def export_and_upload():
     conn.close()
 
     # Subir log de ejecucion
-    log_content = f"Gold Export Log - {timestamp}\n{'='*50}\n"
+    log_content = f"Gold Export Log - {timestamp}\n{'=' * 50}\n"
     for vista, rows, status in resultados:
         log_content += f"{vista}: {rows} filas - {status}\n"
     log_content += f"\nTotal vistas: {len(resultados)}\n"
@@ -121,7 +121,7 @@ def export_and_upload():
     print("\n" + "=" * 60)
     print("Resumen")
     print("=" * 60)
-    ok    = sum(1 for _, _, s in resultados if s == "OK")
+    ok = sum(1 for _, _, s in resultados if s == "OK")
     total = sum(r for _, r, s in resultados if s == "OK")
     print(f"  Vistas exportadas : {ok}/{len(GOLD_VIEWS)}")
     print(f"  Filas totales     : {total:,}")

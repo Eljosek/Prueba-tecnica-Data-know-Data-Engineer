@@ -12,30 +12,30 @@ from azure.identity import InteractiveBrowserCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
 
 SUBSCRIPTION_ID = "64b1483b-b4aa-4a3b-bd59-e11ab2672810"
-RESOURCE_GROUP  = "rg-retailmax-brs-dev"
-FACTORY_NAME    = "adf-retailmax-brs-dev"
-TENANT_ID       = "6f716858-c5ea-4ced-8eb4-417b305f7c49"
+RESOURCE_GROUP = "rg-retailmax-brs-dev"
+FACTORY_NAME = "adf-retailmax-brs-dev"
+TENANT_ID = "6f716858-c5ea-4ced-8eb4-417b305f7c49"
 
 # Tablas Silver: nombre → columna clave primaria
 SILVER_TABLES = {
-    "MSTR_ARTICULOS":    "art_id",
-    "MSTR_TIENDAS":      "id_tienda",
-    "MSTR_PROVEEDORES":  "id_proveedor",
-    "CRM_MIEMBROS":      "id_miembro",
-    "TRANS_VENTAS":      "id_trans",
-    "INV_STOCK_DIARIO":  "id_snapshot",
+    "MSTR_ARTICULOS": "art_id",
+    "MSTR_TIENDAS": "id_tienda",
+    "MSTR_PROVEEDORES": "id_proveedor",
+    "CRM_MIEMBROS": "id_miembro",
+    "TRANS_VENTAS": "id_trans",
+    "INV_STOCK_DIARIO": "id_snapshot",
     "POST_DEVOLUCIONES": "id_devolucion",
 }
 
 # Vistas Gold: nombre → columna clave
 GOLD_VIEWS = {
-    "dim_productos":      "product_id",
-    "dim_tiendas":        "store_id",
-    "dim_clientes":       "customer_id",
-    "fact_ventas":        "sale_id",
-    "fact_inventario":    "inventory_id",
-    "fact_devoluciones":  "return_id",
-    "fact_rfm_clientes":  "customer_id",
+    "dim_productos": "product_id",
+    "dim_tiendas": "store_id",
+    "dim_clientes": "customer_id",
+    "fact_ventas": "sale_id",
+    "fact_inventario": "inventory_id",
+    "fact_devoluciones": "return_id",
+    "fact_rfm_clientes": "customer_id",
 }
 
 
@@ -158,7 +158,8 @@ def crear_dataflow(client, name: str, description: str, sources: list,
             },
         }
     }
-    client.data_flows.create_or_update(RESOURCE_GROUP, FACTORY_NAME, name, resource)
+    client.data_flows.create_or_update(
+        RESOURCE_GROUP, FACTORY_NAME, name, resource)
     print(f"  -> {name}")
 
 
