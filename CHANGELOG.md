@@ -11,23 +11,58 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.0] — 2026-04-13
+
+### Added
+- 3 capturas de pantalla del dashboard Power BI organizadas en `docs/`:
+  `20-dashboard-ventas-por-año.png`, `21-dashboard-top-productos.png`,
+  `22-dashboard-segmentos-rfm.png`.
+- Sección completa "Dashboard Power BI (extra — no solicitado)" en `README.md`:
+  justificación transparente, 3 páginas documentadas con capturas embebidas,
+  admisión honesta de experiencia limitada con Power BI.
+
+### Changed
+- `README.md` — corrección exhaustiva de tildes y acentos en todo el documento
+  (más de 60 palabras corregidas: región, categoría, distribución, ejecución, etc.).
+- `README.md` — tabla de contenido actualizada con nuevo anchor del dashboard.
+- `README.md` — capitalización y tono revisados en secciones de diagnósticos y reflexión.
+- `dashboards/README.md` — tildes corregidas (Conexión, Autenticación, Análisis, etc.).
+
+### Removed
+- Capturas de pantalla originales sin nomenclatura (`pagina 1/2/3.png`) de `dashboards/`,
+  reemplazadas por versiones renombradas y reubicadas en `docs/`.
+
+---
+
+## [1.2.1] — 2026-04-13
+
+### Fixed
+- `data-generation/generate_data.py` — implementadas las 4 anomalías completas:
+  se agregaron Anomalía 3 (valores fuera de rango con -9999) y
+  Anomalía 4 (violaciones de integridad referencial con FK inválidas 999999),
+  que estaban definidas en `config.yaml` pero no se inyectaban en el código.
+- `orchestration/deploy_adf_pipelines.py` — documentado el backoff exponencial
+  nativo de ADF en la política de reintentos (30s base × crecimiento exponencial).
+
+---
+
 ## [1.1.0] — 2026-04-13
 
 ### Removed
 - `.github/workflows/ci.yml` — CI/CD no es un entregable obligatorio de la prueba;
   se elimina para mantener el repositorio limpio.
-- `.flake8` — archivo de configuracion asociado al workflow de CI eliminado.
+- `.flake8` — archivo de configuración asociado al workflow de CI eliminado.
 
 ### Changed
 - `README.md` — reescritura completa:
   - Logo de DataKnow al inicio del documento.
   - Tono natural y personal (no generado por IA).
   - Capturas de pantalla embebidas en cada fase con contexto.
-  - Seccion de reflexion personal: dificultades reales del proyecto
+  - Sección de reflexión personal: dificultades reales del proyecto
     (Medallion, ADF, Data Flows, Terraform, pruebas de calidad).
-  - Referencia a la metodologia Agile Analytics de DataKnow.
-  - Justificacion de escenario y plataforma al inicio.
-  - Instrucciones de reproduccion mas claras (paso a paso).
+  - Referencia a la metodología Agile Analytics de DataKnow.
+  - Justificación de escenario y plataforma al inicio.
+  - Instrucciones de reproducción más claras (paso a paso).
 
 ### Added
 - `docs/logo2020_DataKnow-compressor.png` — logo de DataKnow incluido en el README.
@@ -41,18 +76,18 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`data-generation/`, `docs/`, `orchestration/`, `pipelines/bronze/`,
   `pipelines/gold/`, `pipelines/silver/`).
 - `infra/FASE_2_PASOS_EJECUCION.md` — notas internas de desarrollo.
-- `infra/backend.tf` — archivo de comentarios redundante; la configuracion
-  del backend remoto esta en `providers.tf`.
+- `infra/backend.tf` — archivo de comentarios redundante; la configuración
+  del backend remoto está en `providers.tf`.
 - 3 screenshots redundantes/duplicados de `docs/`.
 
 ### Added
 - 7 capturas de pantalla organizadas con nomenclatura profesional (13–19):
   pipeline runs, alertas por email, 3 reglas de alerta en Azure Monitor,
   roles RBAC en contenedor gold, quality report SQL, y 5/5 pruebas de calidad.
-- Seccion "Capturas de Pantalla" en `README.md` con tabla completa de 19 evidencias.
+- Sección "Capturas de Pantalla" en `README.md` con tabla completa de 19 evidencias.
 
 ### Changed
-- `README.md` — fecha de ultima actualizacion a 13 de abril de 2026.
+- `README.md` — fecha de última actualizacion a 13 de abril de 2026.
 
 ---
 
@@ -80,11 +115,11 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 - `orchestration/deploy_adf_pipelines.py` — retry policy de todos los pipelines actualizada
-  de 1–2 a 3 reintentos, alineada con la definicion IaC (`infra/adf_pipelines.tf`).
+  de 1–2 a 3 reintentos, alineada con la definición IaC (`infra/adf_pipelines.tf`).
 - RBAC: creados 6 role assignments en Azure (Ingeniero: Blob Contributor×3 + SQL Contributor,
   Analista: Blob Reader gold, Administrador: Owner RG). Verificados en cada scope.
 - ADF Linked Services: corregido LS_DataLake_RetailMax a Managed Identity y
-  LS_AzureSQL_RetailMax a connection string explicito (resuelve error 403 en pipelines).
+  LS_AzureSQL_RetailMax a connection string explícito (resuelve error 403 en pipelines).
 - `PL_Orquestador_Maestro` ejecutado exitosamente end-to-end (Bronze → Silver → Gold → Calidad).
 
 ---
@@ -92,11 +127,11 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.9.0] — 2026-04-12
 
 ### Added
-- `dashboards/README.md` — guia de conexion Power BI Desktop a las 8 vistas Gold:
-  modelo de datos, relaciones, paleta de colores y diseño de 5 paginas.
+- `dashboards/README.md` — guía de conexión Power BI Desktop a las 8 vistas Gold:
+  modelo de datos, relaciones, paleta de colores y diseño de 5 páginas.
 - `dashboards/dax_measures.md` — medidas DAX: ventas (7), inventario (4),
   devoluciones (3), clientes RFM (4), KPIs ejecutivos (4).
-- `README.md` — seccion "Dashboard Power BI" con tabla de paginas y archivos de referencia.
+- `README.md` — sección "Dashboard Power BI" con tabla de páginas y archivos de referencia.
 
 ---
 
@@ -122,7 +157,7 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - `README.md` — actualizado con Fase 5 completa (3 alertas, 3 roles RBAC, catalogo de datos,
-  linaje de datos, 5 pruebas de calidad), seccion Extras (CI/CD, Lineage, Monitoreo), tabla
+  linaje de datos, 5 pruebas de calidad), sección Extras (CI/CD, Lineage, Monitoreo), tabla
   Gold actualizada a 8 vistas con descripcion de reglas de negocio por vista.
 - `docs/` — screenshots renombrados con convencion profesional secuencial:
   - `03-sql-verification-azure.png` → `04-fase1-sql-verification-azure.png`
@@ -144,7 +179,7 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.7.0] — 2026-04-13
 
 ### Added
-- `docs/data_catalog.md` — catalogo de datos completo con una seccion por tabla (Bronze) y por
+- `docs/data_catalog.md` — catalogo de datos completo con una sección por tabla (Bronze) y por
   vista (Gold). Documenta nombre de campo, tipo, origen, si es calculado, si contiene PII y la
   regla de negocio aplicada. Incluye tabla de acceso por rol RBAC.
 - `pipelines/tests/quality_tests.py` — 5 pruebas automatizadas de calidad contra las vistas Gold
@@ -203,11 +238,11 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - 2 Calidad: `DF_Silver_Quality_Report` (metricas agregadas) y `DF_Quality_Checks` (errores)
 - `orchestration/PL_Orquestador_Maestro.json` — exportacion del pipeline maestro en formato
   ARM/ADF JSON.
-- `infra/adf_pipelines.tf` — definicion IaC Terraform de linked services, datasets y 5 pipelines.
+- `infra/adf_pipelines.tf` — definición IaC Terraform de linked services, datasets y 5 pipelines.
 
 ### Changed
 - `README.md` — actualizado para documentar las 5 fases completas con arquitectura, recursos
-  Azure, instrucciones de reproduccion y tabla de data flows.
+  Azure, instrucciones de reproducción y tabla de data flows.
 
 ### Fixed
 - Corregido nombre de columna `error_timestamp` → `timestamp_error` en `PL_Calidad_Datos`,

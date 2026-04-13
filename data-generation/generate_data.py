@@ -293,8 +293,9 @@ def inyectar_anomalias(df: pd.DataFrame, config: dict,
 
     Anomalías documentadas:
     1. Duplicados exactos
-    2. Fechas fuera de rango
-    3. Campos inconsistentes (valores nulos + falta de integridad)
+    2. Valores nulos intencionales
+    3. Valores fuera de rango (negativos / absurdos)
+    4. Violaciones de integridad referencial (FK inválidas)
     """
     df_copy = df.copy()
     anomalies = config.get('anomalies', {})
@@ -317,6 +318,30 @@ def inyectar_anomalias(df: pd.DataFrame, config: dict,
             df_copy.loc[mask, col] = None
         logger.warning(f"  ⚠ Anomalía 2: ~{int(len(df_copy) *
                                                null_rate)} valores NULOS inyectados en {tabla_nombre}")
+
+    # Anomalía 3: Valores fuera de rango (precios negativos, cantidades absurdas)
+    out_of_range_rate = anomalies.get('out_of_range_rate', 0.001)
+    numeric_cols = df_copy.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    # Excluir columnas de ID para no romper joins
+    numeric_cols = [c for c in numeric_cols if not c.startswith('id_')]
+    if out_of_range_rate > 0 and len(numeric_cols) > 0:
+        n_oor = max(1, int(len(df_copy) * out_of_range_rate))
+        col_target = np.random.choice(numeric_cols)
+        indices_oor = np.random.choice(len(df_copy), n_oor, replace=False)
+        df_copy.loc[indices_oor, col_target] = -9999
+        logger.warning(
+            f"  ⚠ Anomalía 3: {n_oor} valores FUERA DE RANGO (-9999) en columna '{col_target}' de {tabla_nombre}")
+
+    # Anomalía 4: Violaciones de integridad referencial (FK inválidas)
+    referential_integrity_violation_rate = anomalies.get('referential_integrity_violation_rate', 0.005)
+    fk_cols = [c for c in df_copy.columns if c.startswith('id_') and c != df_copy.columns[0]]
+    if referential_integrity_violation_rate > 0 and len(fk_cols) > 0:
+        n_fk = max(1, int(len(df_copy) * referential_integrity_violation_rate))
+        fk_target = np.random.choice(fk_cols)
+        indices_fk = np.random.choice(len(df_copy), n_fk, replace=False)
+        df_copy.loc[indices_fk, fk_target] = 999999  # ID inexistente
+        logger.warning(
+            f"  ⚠ Anomalía 4: {n_fk} FK INVÁLIDAS (999999) en columna '{fk_target}' de {tabla_nombre}")
 
     return df_copy
 

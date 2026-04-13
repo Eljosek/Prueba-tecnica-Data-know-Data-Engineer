@@ -223,6 +223,8 @@ def main():
                             "policy": {
                                 "timeout": "0.01:00:00",
                                 "retry": 3,
+                                # ADF aplica backoff exponencial internamente:
+                                # intento 1 → ~30s, intento 2 → ~60s, intento 3 → ~120s
                                 "retryIntervalInSeconds": 30,
                             },
                             "userProperties": [],
