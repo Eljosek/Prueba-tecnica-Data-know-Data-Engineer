@@ -1,10 +1,10 @@
-<p align="center">
+﻿<p align="center">
   <img src="docs/logo2020_DataKnow-compressor.png" alt="DataKnow Logo" width="320"/>
 </p>
 
-# Prueba Tecnica — Ingeniero de Datos
+# Prueba Técnica — Ingeniero de Datos
 
-**Escenario B: RetailMax · Retail y Comercio Electronico**
+**Escenario B: RetailMax · Retail y Comercio Electrónico**
 
 | | |
 |---|---|
@@ -18,7 +18,7 @@
 
 ## Hola, equipo de DataKnow
 
-Quiero empezar agradeciendo la oportunidad. Soy estudiante de Ingenieria de Sistemas y esta prueba fue, sin exagerar, el proyecto mas completo que he armado hasta ahora. Me obligo a salir de la zona comoda, conectar muchas piezas que solo habia visto en teoria y resolver problemas reales contra la nube.
+Quiero empezar agradeciendo la oportunidad. Soy Estudiante de Ingeniería de Sistemas y esta prueba fue, sin exagerar, el proyecto más completo que he armado hasta ahora. Me obligó a salir de la zona cómoda, conectar muchas piezas que solo había visto en teoría y resolver problemas reales contra la nube.
 
 Elegi el **Escenario B (RetailMax)** porque me parecio el mas tangible: ventas, inventarios, devoluciones... son datos que puedes visualizar mentalmente y eso me ayudaba a validar si los resultados tenian sentido o no. La logica de negocio tipo RFM, quiebres de stock y tasas de devolucion le daba peso analitico real.
 
@@ -30,14 +30,14 @@ La plataforma es **Microsoft Azure** porque es la que mejor conozco como estudia
 
 - [Arquitectura general](#arquitectura-general)
 - [Recursos desplegados en Azure](#recursos-desplegados-en-azure)
-- [Fase 1 — Generacion de datos sinteticos](#fase-1--generacion-de-datos-sinteticos)
-- [Fase 2 — Infraestructura como Codigo (Terraform)](#fase-2--infraestructura-como-codigo-terraform)
+- [Fase 1 — Generación de datos sintéticos](#fase-1--generación-de-datos-sintéticos)
+- [Fase 2 — Infraestructura como Código (Terraform)](#fase-2--infraestructura-como-código-terraform)
 - [Fase 3 — Pipeline Medallion (Bronze → Silver → Gold)](#fase-3--pipeline-medallion-bronze--silver--gold)
-- [Fase 4 — Orquestacion con Azure Data Factory](#fase-4--orquestacion-con-azure-data-factory)
+- [Fase 4 — Orquestación con Azure Data Factory](#fase-4--orquestación-con-azure-data-factory)
 - [Fase 5 — Gobierno, seguridad y calidad](#fase-5--gobierno-seguridad-y-calidad)
 - [Dashboard Power BI (extra)](#dashboard-power-bi-extra)
-- [Como reproducir este proyecto](#como-reproducir-este-proyecto)
-- [Reflexion personal y metodologia](#reflexion-personal-y-metodologia)
+- [Cómo reproducir este proyecto](#cómo-reproducir-este-proyecto)
+- [Reflexión personal y metodología](#reflexión-personal-y-metodología)
 
 ---
 
@@ -101,17 +101,17 @@ Todo vive en la region **Brazil South** dentro de un solo Resource Group:
 
 ---
 
-## Fase 1 — Generacion de datos sinteticos
+## Fase 1 — Generación de datos sintéticos
 
 **Carpeta:** `data-generation/`
 
-Genere datos sinteticos con `Faker` y `numpy` para 7 tablas del dominio retail. Los datos buscan ser realistas: precios coherentes, fechas dentro de rangos logicos, relaciones entre proveedores y articulos, etc.
+Genere datos sintéticos con `Faker` y `numpy` para 7 tablas del dominio retail. Los datos buscan ser realistas: precios coherentes, fechas dentro de rangos lógicos, relaciones entre proveedores y articulos, etc.
 
 | Tabla | Filas | Que contiene |
 |---|---|---|
-| `MSTR_ARTICULOS` | 5 000 | Catalogo de productos con categoria y proveedor |
+| `MSTR_ARTICULOS` | 5 000 | Catálogo de productos con categoria y proveedor |
 | `MSTR_TIENDAS` | 200 | Tiendas con tipo, ciudad y metros cuadrados |
-| `MSTR_PROVEEDORES` | 500 | Proveedores con pais y calificacion |
+| `MSTR_PROVEEDORES` | 500 | Proveedores con pais y calificación |
 | `CRM_MIEMBROS` | 50 000 | Clientes con canal preferido y fecha de alta |
 | `TRANS_VENTAS` | 1 500 000 | Transacciones: precio, descuento, canal |
 | `INV_STOCK_DIARIO` | 365 000 | Snapshots de stock fisico, transito y reservado |
@@ -125,12 +125,12 @@ python data-generation/load_to_sql.py     # carga a Azure SQL
 ```
 
 <p align="center">
-  <img src="docs/01-fase1-generacion-datos.png" alt="Generacion de datos" width="700"/>
-  <br><em>Ejecucion de generate_data.py — 7 tablas generadas</em>
+  <img src="docs/01-fase1-generacion-datos.png" alt="Generación de datos" width="700"/>
+  <br><em>Ejecución de generate_data.py — 7 tablas generadas</em>
 </p>
 
 <p align="center">
-  <img src="docs/04-fase1-sql-verification-azure.png" alt="Verificacion SQL Azure" width="700"/>
+  <img src="docs/04-fase1-sql-verification-azure.png" alt="Verificación SQL Azure" width="700"/>
   <br><em>Conteo de filas directamente en Azure SQL</em>
 </p>
 
@@ -138,7 +138,7 @@ El diagrama ER del modelo esta documentado en [`docs/er_diagram.md`](docs/er_dia
 
 ---
 
-## Fase 2 — Infraestructura como Codigo (Terraform)
+## Fase 2 — Infraestructura como Código (Terraform)
 
 **Carpeta:** `infra/`
 
@@ -163,7 +163,7 @@ terraform plan -var-file="terraform.tfvars"
 terraform apply -var-file="terraform.tfvars"
 ```
 
-> Las instrucciones completas de despliegue estan en `infra/` junto con los archivos de configuracion.
+> Las instrucciones completas de despliegue estan en `infra/` junto con los archivos de configuración.
 
 ---
 
@@ -173,11 +173,11 @@ terraform apply -var-file="terraform.tfvars"
 
 ### Bronze — Ingesta cruda
 
-`pipelines/bronze/ingestion.py` copia las 7 tablas de SQL a Parquet en el contenedor `bronze`. Agrega columnas de auditoria: `batch_id` (UUID), `ingest_timestamp` (UTC) y `source_system`.
+`pipelines/bronze/ingestion.py` copia las 7 tablas de SQL a Parquet en el contenedor `bronze`. Agrega columnas de auditoría: `batch_id` (UUID), `ingest_timestamp` (UTC) y `source_system`.
 
 ### Silver — Limpieza y calidad
 
-`pipelines/silver/cleaning.py` aplica `SELECT DISTINCT` y registra metricas por tabla en `pipeline_quality_report`: filas leidas, filas limpias, duplicados detectados, nulos y duracion. Los errores individuales se guardan en `pipeline_errors`.
+`pipelines/silver/cleaning.py` aplica `SELECT DISTINCT` y registra métricas por tabla en `pipeline_quality_report`: filas leidas, filas limpias, duplicados detectados, nulos y duracion. Los errores individuales se guardan en `pipeline_errors`.
 
 `pipelines/silver/export_quality_logs.py` exporta esos logs a `silver/logs/` en Storage.
 
@@ -215,7 +215,7 @@ terraform apply -var-file="terraform.tfvars"
 
 ---
 
-## Fase 4 — Orquestacion con Azure Data Factory
+## Fase 4 — Orquestación con Azure Data Factory
 
 **Carpeta:** `orchestration/`
 
@@ -252,9 +252,9 @@ Tambien existe `orchestration/pipeline_orchestrator.py` como alternativa local q
 
 ## Fase 5 — Gobierno, seguridad y calidad
 
-### Gestion de secretos
+### Gestión de secretos
 
-**Key Vault** (`kv-retailmax-brs-dev`) almacena toda credencial sensible: password de SQL y connection strings. Ningun script tiene credenciales en texto plano — se leen de variables de entorno localmente y de Key Vault en ADF.
+**Key Vault** (`kv-retailmax-brs-dev`) almacena toda credencial sensible: password de SQL y connection strings. Ningún script tiene credenciales en texto plano — se leen de variables de entorno localmente y de Key Vault en ADF.
 
 `.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform esta en Storage remoto, no en el repositorio.
 
@@ -302,7 +302,7 @@ Tres reglas de alerta definidas en Terraform (`infra/main.tf`) con Action Group 
 - Application Insights disponible para monitoreo adicional
 - Las tablas `pipeline_quality_report` y `pipeline_errors` en SQL sirven como log de auditoria de cada ejecucion
 
-### Catalogo de datos
+### Catálogo de datos
 
 [`docs/data_catalog.md`](docs/data_catalog.md) documenta cada tabla Bronze y cada vista Gold con: nombre de campo, tipo, origen, si es calculado, si contiene PII y la regla de negocio aplicada.
 
@@ -343,7 +343,7 @@ Archivos: `dashboards/README.md` (guia de conexion) y `dashboards/dax_measures.m
 
 ---
 
-## Como reproducir este proyecto
+## Cómo reproducir este proyecto
 
 ### Requisitos previos
 
@@ -392,23 +392,23 @@ python pipelines/tests/quality_tests.py
 
 ---
 
-## Reflexion personal y metodologia
+## Reflexión personal y metodología
 
-### Lo dificil (siendo honesto)
+### Lo difícil (siendo honesto)
 
 Este proyecto me tomo varios dias y hubo momentos en los que me senti bastante perdido. Quiero ser transparente sobre las partes que mas me costaron porque creo que eso tambien dice algo sobre el proceso de aprendizaje:
 
 - **La arquitectura Medallion:** Entender bien la separacion Bronze/Silver/Gold no fue trivial. Al principio queria meter toda la logica en una sola etapa y me di cuenta de que asi se pierde la trazabilidad. Separar responsabilidades (ingesta cruda, limpieza, vistas de negocio) fue un antes y despues.
 
-- **Azure Data Factory:** La conexion entre ADF y los demas servicios me dio muchos dolores de cabeza. El error 403 del MSI contra Storage me tuvo horas dandole vueltas hasta que entendi que necesitaba asignar `Storage Blob Data Contributor` a la identidad administrada. Tampoco fue facil crear los pipelines y data flows por SDK — la documentacion de `azure-mgmt-datafactory` es bastante escasa.
+- **Azure Data Factory:** La conexion entre ADF y los demas servicios me dio muchos dolores de cabeza. El error 403 del MSI contra Storage me tuvo horas dándole vueltas hasta que entendi que necesitaba asignar `Storage Blob Data Contributor` a la identidad administrada. Tampoco fue facil crear los pipelines y data flows por SDK — la documentacion de `azure-mgmt-datafactory` es bastante escasa.
 
 - **Los Data Flows visuales:** Definir 16 data flows programaticamente (no desde el portal) fue un reto. Cada uno tiene su propio DSL y cualquier error de sintaxis hace que ADF lo rechace sin un mensaje claro. Fue mucho prueba y error.
 
 - **Terraform y el estado remoto:** Configurar el backend remoto en Storage fue sencillo en teoria, pero en la practica tuve que crear el contenedor `tfstate` antes de poder iniciar. Ese tipo de dependencias circulares (necesitas el recurso que aun no existe para guardarlo) me confundio al inicio.
 
-- **Las pruebas de calidad:** Disenar tests que fueran significativos y no solo "la tabla tiene filas" requirio pensar bien que podia salir mal: fechas futuras, nulos en PKs, valores negativos donde no deberia haberlos.
+- **Las pruebas de calidad:** Diseñar tests que fueran significativos y no solo "la tabla tiene filas" requirio pensar bien que podia salir mal: fechas futuras, nulos en PKs, valores negativos donde no deberia haberlos.
 
-### Metodologia Agile Analytics
+### Metodología Agile Analytics
 
 Algo que note al investigar sobre DataKnow es su enfoque de **Agile Analytics**: ciclos cortos de Entender → Arquitectura → Adopcion → Soporte, con iteraciones tipo Scrum (Planning → Daily → Review → Retrospectiva). Aunque trabaje solo en este proyecto, intente seguir un patron similar:
 
@@ -417,14 +417,14 @@ Algo que note al investigar sobre DataKnow es su enfoque de **Agile Analytics**:
 3. **Adopcion** — Fui implementando fase por fase, verificando cada una antes de pasar a la siguiente. No intente hacer todo de golpe.
 4. **Soporte** — Al final agregue alertas, monitoreo y pruebas de calidad para que el pipeline se pueda mantener en el tiempo.
 
-Cada commit en el `CHANGELOG.md` refleja una iteracion real del proyecto. No es un commit gigante al final — fui construyendo incrementalmente, y cuando algo se rompia, lo arreglaba y seguia.
+Cada commit en el `CHANGELOG.md` refleja una iteración real del proyecto. No es un commit gigante al final — fui construyendo incrementalmente, y cuando algo se rompía, lo arreglaba y seguia.
 
 ### Lo que me llevo
 
-Mas alla de la prueba tecnica, este proyecto me dejo claro que la ingenieria de datos no es solo hacer queries o mover archivos. Es disenar sistemas que sean reproducibles, auditables y que alguien mas pueda entender. Ese cambio de mentalidad fue lo mas valioso.
+Más allá de la prueba técnica, este proyecto me dejo claro que la ingeniería de datos no es solo hacer queries o mover archivos. Es diseñar sistemas que sean reproducibles, auditables y que alguien mas pueda entender. Ese cambio de mentalidad fue lo más valioso.
 
 ---
 
 **Jose Miguel Herrera Gutierrez**  
-Estudiante de Ingenieria de Sistemas  
+Estudiante de Ingeniería de Sistemas  
 Abril 2026
