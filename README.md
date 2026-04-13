@@ -18,11 +18,11 @@
 
 ## Hola, equipo de DataKnow
 
-Quiero empezar agradeciendo la oportunidad. Soy Estudiante de Ingeniería de Sistemas y esta prueba fue, sin exagerar, el proyecto más completo que he armado hasta ahora. Me obligó a salir de la zona cómoda, conectar muchas piezas que solo había visto en teoría y resolver problemas reales contra la nube.
+Quiero comenzar agradeciendo la oportunidad. Actualmente soy estudiante de Ingeniería de Sistemas y, sin exagerar, esta prueba ha sido uno de los proyectos más completos que he desarrollado hasta ahora. Me retó a salir de mi zona de confort, a conectar conceptos que antes solo había visto en teoría y, sobre todo, a enfrentar un problema real con necesidades de negocio claras.
 
-Elegí el **Escenario B (RetailMax)** porque me pareció el más tangible: ventas, inventarios, devoluciones... son datos que puedes visualizar mentalmente y eso me ayudaba a validar si los resultados tenían sentido o no. La lógica de negocio tipo RFM, quiebres de stock y tasas de devolución le daba peso analítico real.
+Elegí el **Escenario B (RetailMax)** porque lo considero altamente tangible: ventas, inventarios y devoluciones son dinámicas fáciles de interpretar y validar. Esto me permitió contrastar constantemente si los resultados obtenidos tenían sentido desde una perspectiva de negocio. Además, la incorporación de métricas como RFM, quiebres de stock y tasas de devolución aportó un nivel analítico más profundo y realista al desarrollo.
 
-La plataforma es **Microsoft Azure** porque es la que mejor conozco como estudiante (tengo la suscripción Azure for Students) y porque Data Factory + SQL Database + Storage Gen2 cubren todo el flujo de datos sin necesidad de recursos más complejos como Databricks o Synapse.
+La solución está construida sobre **Microsoft Azure**, principalmente porque es la plataforma con la que tengo mayor familiaridad como estudiante (gracias a Azure for Students). Herramientas como Data Factory, SQL Database y Storage Gen2 me permitieron cubrir de manera integral el flujo de datos, sin necesidad de recurrir a servicios más avanzados como Databricks o Synapse, manteniendo así una arquitectura eficiente y adecuada al alcance del proyecto.
 
 ---
 
