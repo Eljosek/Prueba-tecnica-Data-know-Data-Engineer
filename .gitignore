@@ -27,24 +27,14 @@ data-generation/output/
 .vscode/settings.json
 .idea/
 
-# PDFs y documentos de prueba técnica
+# Documentos y notas locales
 *.pdf
+*.txt
 FASE_1_EXPLICACION_COMPLETA.md
 RESUMEN_SESION.md
-Prueba técnica Ingeniero de Datos - Actualizada.txt
-infra/DEPLOYMENT_INVENTORY.txt
+Guia_cuentas_cloud.md
 verify_views.py
 orchestration/run_views_pipeline.py
-
-# Images y assets externos
-Images/
-images/
-
-# Screenshots folder (archivos temporales, fake evidence)
-docs/screenshots/
-
-# Local documentation
-Guia_cuentas_cloud.md
 
 # Secrets
 *.pem

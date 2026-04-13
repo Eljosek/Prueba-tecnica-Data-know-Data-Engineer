@@ -2,7 +2,7 @@
   <img src="docs/logo2020_DataKnow-compressor.png" alt="DataKnow Logo" width="320"/>
 </p>
 
-# Prueba Técnica — Ingeniero de Datos
+# Prueba Técnica - Ingeniero de Datos
 
 **Escenario B: RetailMax · Retail y Comercio Electrónico**
 
@@ -30,12 +30,12 @@ La plataforma es **Microsoft Azure** porque es la que mejor conozco como estudia
 
 - [Arquitectura general](#arquitectura-general)
 - [Recursos desplegados en Azure](#recursos-desplegados-en-azure)
-- [Fase 1 — Generación de datos sintéticos](#fase-1--generación-de-datos-sintéticos)
-- [Fase 2 — Infraestructura como Código (Terraform)](#fase-2--infraestructura-como-código-terraform)
-- [Fase 3 — pipeline Medallion (Bronze → Silver → Gold)](#fase-3--pipeline-medallion-bronze--silver--gold)
-- [Fase 4 — Orquestación con Azure Data Factory](#fase-4--orquestación-con-azure-data-factory)
-- [Fase 5 — Gobierno, seguridad y calidad](#fase-5--gobierno-seguridad-y-calidad)
-- [Dashboard Power BI (extra — no solicitado)](#dashboard-power-bi-extra--no-solicitado)
+- [Fase 1: Generación de datos sintéticos](#fase-1-generación-de-datos-sintéticos)
+- [Fase 2: Infraestructura como Código (Terraform)](#fase-2-infraestructura-como-código-terraform)
+- [Fase 3: Pipeline Medallion (Bronze → Silver → Gold)](#fase-3-pipeline-medallion-bronze--silver--gold)
+- [Fase 4: Orquestación con Azure Data Factory](#fase-4-orquestación-con-azure-data-factory)
+- [Fase 5: Gobierno, seguridad y calidad](#fase-5-gobierno-seguridad-y-calidad)
+- [Dashboard Power BI (extra, no solicitado)](#dashboard-power-bi-extra-no-solicitado)
 - [Cómo reproducir este proyecto](#cómo-reproducir-este-proyecto)
 - [Reflexión personal y metodología](#reflexión-personal-y-metodología)
 
@@ -101,7 +101,7 @@ Todo vive en la región **Brazil South** dentro de un solo Resource Group:
 
 ---
 
-## Fase 1 — Generación de datos sintéticos
+## Fase 1: Generación de datos sintéticos
 
 **Carpeta:** `data-generation/`
 
@@ -126,7 +126,7 @@ python data-generation/load_to_sql.py     # carga a Azure SQL
 
 <p align="center">
   <img src="docs/01-fase1-generacion-datos.png" alt="Generación de datos" width="700"/>
-  <br><em>Ejecución de generate_data.py — 7 tablas generadas</em>
+  <br><em>Ejecución de generate_data.py, 7 tablas generadas</em>
 </p>
 
 <p align="center">
@@ -138,7 +138,7 @@ El diagrama ER del modelo está documentado en [`docs/er_diagram.md`](docs/er_di
 
 ---
 
-## Fase 2 — Infraestructura como Código (Terraform)
+## Fase 2: Infraestructura como Código (Terraform)
 
 **Carpeta:** `infra/`
 
@@ -153,7 +153,7 @@ Toda la infraestructura se define con Terraform (`azurerm ~> 3.80`). Nada se cre
 | `outputs.tf` | IDs y nombres de todos los recursos creados |
 | `providers.tf` | Proveedor azurerm + backend remoto en Storage Account |
 
-**Estado de Terraform:** almacenado remotamente en `stgretailmaxbrsdev/tfstate/terraform.tfstate` — no está en git (`.gitignore` lo excluye).
+**Estado de Terraform:** almacenado remotamente en `stgretailmaxbrsdev/tfstate/terraform.tfstate`, no está en git (`.gitignore` lo excluye).
 
 **Despliegue:**
 ```bash
@@ -167,15 +167,15 @@ terraform apply -var-file="terraform.tfvars"
 
 ---
 
-## Fase 3 — pipeline Medallion (Bronze → Silver → Gold)
+## Fase 3: Pipeline Medallion (Bronze → Silver → Gold)
 
 **Carpeta:** `pipelines/`
 
-### Bronze — Ingesta cruda
+### Bronze: Ingesta cruda
 
 `pipelines/bronze/ingestion.py` copia las 7 tablas de SQL a Parquet en el contenedor `bronze`. Agrega columnas de auditoría: `batch_id` (UUID), `ingest_timestamp` (UTC) y `source_system`.
 
-### Silver — Limpieza y calidad
+### Silver: Limpieza y calidad
 
 `pipelines/silver/cleaning.py` aplica `SELECT DISTINCT` y registra métricas por tabla en `pipeline_quality_report`: filas leídas, filas limpias, duplicados detectados, nulos y duración. Los errores individuales se guardan en `pipeline_errors`.
 
@@ -183,10 +183,10 @@ terraform apply -var-file="terraform.tfvars"
 
 <p align="center">
   <img src="docs/18-fase4-quality-report-sql.png" alt="Quality report en SQL" width="700"/>
-  <br><em>Reporte de calidad en pipeline_quality_report — todas las tablas con estado EXITOSO</em>
+  <br><em>Reporte de calidad en pipeline_quality_report: estado de procesamiento por tabla</em>
 </p>
 
-### Gold — Vistas de negocio
+### Gold: Vistas de negocio
 
 `pipelines/gold/views.sql` define 8 vistas SQL con reglas de negocio reales:
 
@@ -215,7 +215,7 @@ terraform apply -var-file="terraform.tfvars"
 
 ---
 
-## Fase 4 — Orquestación con Azure Data Factory
+## Fase 4: Orquestación con Azure Data Factory
 
 **Carpeta:** `orchestration/`
 
@@ -250,15 +250,15 @@ También existe `orchestration/pipeline_orchestrator.py` como alternativa local 
 
 ---
 
-## Fase 5 — Gobierno, seguridad y calidad
+## Fase 5: Gobierno, seguridad y calidad
 
 ### Gestión de secretos
 
-**Key Vault** (`kv-retailmax-brs-dev`) almacena toda credencial sensible: password de SQL y connection strings. Ningún script tiene credenciales en texto plano — se leen de variables de entorno localmente y de Key Vault en ADF.
+**Key Vault** (`kv-retailmax-brs-dev`) almacena toda credencial sensible: password de SQL y connection strings. Ningún script tiene credenciales en texto plano, se leen de variables de entorno localmente y de Key Vault en ADF.
 
 `.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform está en Storage remoto, no en el repositorio.
 
-### RBAC — 3 roles implementados
+### RBAC: 3 roles implementados
 
 Se crearon 3 grupos en Azure Active Directory y se asignaron roles con `orchestration/deploy_rbac.py`:
 
@@ -268,14 +268,14 @@ Se crearon 3 grupos en Azure Active Directory y se asignaron roles con `orchestr
 | Analista de Datos | `Blob Data Reader` solo en gold | `Reader` | Solo lectura gold |
 | Administrador | `Owner` | `Owner` | Resource Group completo |
 
-El Analista no tiene acceso a bronze ni silver — solo puede leer gold. Esto asegura que los datos crudos y en proceso queden protegidos.
+El Analista no tiene acceso a bronze ni silver, solo puede leer gold. Esto asegura que los datos crudos y en proceso queden protegidos.
 
 <p align="center">
   <img src="docs/17-fase5-rbac-roles-gold.png" alt="RBAC roles" width="700"/>
   <br><em>Roles RBAC asignados a los 3 grupos AAD en el contenedor gold</em>
 </p>
 
-### Alertas — Azure Monitor
+### Alertas: Azure Monitor
 
 Tres reglas de alerta definidas en Terraform (`infra/main.tf`) con Action Group para Notificación por correo:
 
@@ -310,7 +310,7 @@ Tres reglas de alerta definidas en Terraform (`infra/main.tf`) con Action Group 
 
 [`docs/data_lineage.md`](docs/data_lineage.md) tiene diagramas Mermaid con el flujo completo: desde las 7 tablas SQL de origen hasta las 8 vistas Gold, incluyendo campos calculados y reglas de transformación por vista.
 
-### Pruebas de calidad — 5/5 pasadas
+### Pruebas de calidad: 5/5 pasadas
 
 `pipelines/tests/quality_tests.py` ejecuta 5 pruebas automatizadas contra las vistas Gold:
 
@@ -322,44 +322,44 @@ Tres reglas de alerta definidas en Terraform (`infra/main.tf`) con Action Group 
 
 <p align="center">
   <img src="docs/19-fase5-quality-tests-5de5.png" alt="5 de 5 tests pasados" width="700"/>
-  <br><em>Las 5 pruebas de calidad ejecutadas — todas pasaron</em>
+  <br><em>Las 5 pruebas de calidad ejecutadas, todas pasaron</em>
 </p>
 
 ---
 
-## Dashboard Power BI (extra — no solicitado)
+## Dashboard Power BI (extra, no solicitado)
 
-Quiero ser transparente: la prueba técnica no pide un dashboard. Lo sé. Pero después de construir las 8 vistas Gold con sus reglas de negocio, quería validar visualmente que los datos realmente tuvieran sentido antes de entregar. No me bastaba con ver filas en SQL — necesitaba graficarlo para confirmar que las transformaciones producían resultados coherentes.
+Quiero ser transparente: la prueba técnica no pide un dashboard. Lo sé. Pero después de construir las 8 vistas Gold con sus reglas de negocio, quería validar visualmente que los datos realmente tuvieran sentido antes de entregar. No me bastaba con ver filas en SQL, necesitaba graficarlo para confirmar que las transformaciones producían resultados coherentes.
 
 Mi experiencia con Power BI es muy limitada. Nunca había armado un dashboard completo, y este fue mi primer intento real conectando datos desde Azure SQL. El resultado no es un tablero de producción ni pretende serlo, pero cumple su propósito: demuestra que la capa Gold funciona y que los datos son consumibles para análisis.
 
 Usé **Power BI Desktop** (versión gratuita) conectado directamente a las vistas Gold de `sqldb-retailmax-brs-dev`.
 
-### Página 1 — Ventas por año
+### Página 1: Ventas por año
 
 Muestra el monto neto de ventas (`net_amount`) agrupado por año (2023 y 2024). Sirve para validar que `fact_ventas` tiene cobertura temporal completa y que los cálculos de `qty_vendida * precio_unitario - descuento` producen valores razonables.
 
 <p align="center">
   <img src="docs/20-dashboard-ventas-por-año.png" alt="Dashboard - Ventas por año" width="700"/>
-  <br><em>Ventas netas por año — datos de fact_ventas</em>
+  <br><em>Ventas netas por año (fact_ventas)</em>
 </p>
 
-### Página 2 — Top productos
+### Página 2: Top productos
 
-Grafica los productos con mayor volumen de transacciones usando `product_name` de `dim_productos`. Confirma que el JOIN entre `fact_ventas` y `dim_productos` funciona correctamente y que la jerarquía de categorías tiene sentido.
+Grafica la cantidad de transacciones (`sale_id`) por producto usando `product_name` de `dim_productos`. Confirma que el JOIN entre `fact_ventas` y `dim_productos` funciona correctamente y que los nombres de producto se resuelven bien.
 
 <p align="center">
   <img src="docs/21-dashboard-top-productos.png" alt="Dashboard - Top productos" width="700"/>
-  <br><em>Productos con más transacciones — JOIN fact_ventas + dim_productos</em>
+  <br><em>Cantidad de transacciones por producto (fact_ventas + dim_productos)</em>
 </p>
 
-### Página 3 — Segmentos RFM
+### Página 3: Segmentos RFM
 
 Muestra la distribución de clientes por `rfm_classification` desde `fact_rfm_clientes`. Los segmentos (Champions, Loyal, At_Risk, otros) se generan con el modelo RFM a 90 días usando NTILE(5). El gráfico confirma que la segmentación produce una distribución realista.
 
 <p align="center">
   <img src="docs/22-dashboard-segmentos-rfm.png" alt="Dashboard - Segmentos RFM" width="700"/>
-  <br><em>Distribución de clientes por segmento RFM — fact_rfm_clientes</em>
+  <br><em>Distribución de clientes por segmento RFM (fact_rfm_clientes)</em>
 </p>
 
 ### Archivos del dashboard
@@ -411,7 +411,7 @@ python pipelines/gold/create_views.py
 python pipelines/gold/export_to_storage.py
 python pipelines/upload_to_storage.py
 
-# 4. Desplegar ADF (opcional — requiere credenciales Azure)
+# 4. Desplegar ADF (opcional, requiere credenciales Azure)
 python orchestration/deploy_adf_pipelines.py
 python orchestration/deploy_adf_dataflows.py
 
@@ -429,7 +429,7 @@ Este proyecto me tomó varios días y hubo momentos en los que me sentí bastant
 
 - **La arquitectura Medallion:** Entender bien la separación Bronze/Silver/Gold no fue trivial. Al principio quería meter toda la lógica en una sola etapa y me di cuenta de que así se pierde la trazabilidad. Separar responsabilidades (ingesta cruda, limpieza, vistas de negocio) fue un antes y después.
 
-- **Azure Data Factory:** La conexión entre ADF y los demás servicios me dio muchos dolores de cabeza. El error 403 del MSI contra Storage me tuvo horas dándole vueltas hasta que entendí que necesitaba asignar `Storage Blob Data Contributor` a la identidad administrada. Tampoco fue fácil crear los pipelines y data flows por SDK — la documentación de `azure-mgmt-datafactory` es bastante escasa.
+- **Azure Data Factory:** La conexión entre ADF y los demás servicios me dio muchos dolores de cabeza. El error 403 del MSI contra Storage me tuvo horas dándole vueltas hasta que entendí que necesitaba asignar `Storage Blob Data Contributor` a la identidad administrada. Tampoco fue fácil crear los pipelines y data flows por SDK. La documentación de `azure-mgmt-datafactory` es bastante escasa.
 
 - **Los Data Flows visuales:** Definir 16 data flows programáticamente (no desde el portal) fue un reto. Cada uno tiene su propio DSL y cualquier error de sintaxis hace que ADF lo rechace sin un mensaje claro. Fue mucho prueba y error.
 
@@ -441,12 +441,12 @@ Este proyecto me tomó varios días y hubo momentos en los que me sentí bastant
 
 Algo que noté al investigar sobre DataKnow es su enfoque de **Agile Analytics**: ciclos cortos de Entender → Arquitectura → Adopción → Soporte, con iteraciones tipo Scrum (Planning → Daily → Review → Retrospectiva). Aunque trabajé solo en este proyecto, intenté seguir un patrón similar:
 
-1. **Entender** — Primero leí todo el documento de la prueba, entendí cada fase y armé un plan mental de qué necesitaba.
-2. **Arquitectura** — Definí la infraestructura con Terraform antes de escribir los scripts de datos. Primero el esqueleto, luego la carne.
-3. **Adopción** — Fui implementando fase por fase, verificando cada una antes de pasar a la siguiente. No intenté hacer todo de golpe.
-4. **Soporte** — Al final agregué alertas, monitoreo y pruebas de calidad para que el pipeline se pueda mantener en el tiempo.
+1. **Entender**: Primero leí todo el documento de la prueba, entendí cada fase y armé un plan mental de qué necesitaba.
+2. **Arquitectura**: Definí la infraestructura con Terraform antes de escribir los scripts de datos. Primero el esqueleto, luego la carne.
+3. **Adopción**: Fui implementando fase por fase, verificando cada una antes de pasar a la siguiente. No intenté hacer todo de golpe.
+4. **Soporte**: Al final agregué alertas, monitoreo y pruebas de calidad para que el pipeline se pueda mantener en el tiempo.
 
-Cada commit en el `CHANGELOG.md` refleja una iteración real del proyecto. No es un commit gigante al final — fui construyendo incrementalmente, y cuando algo se rompía, lo arreglaba y seguía.
+Cada commit en el `CHANGELOG.md` refleja una iteración real del proyecto. No es un commit gigante al final, fui construyendo incrementalmente, y cuando algo se rompía, lo arreglaba y seguía.
 
 ### Lo que me llevo
 
@@ -455,5 +455,4 @@ Más allá de la prueba técnica, este proyecto me dejó claro que la ingenierí
 ---
 
 **Jose Miguel Herrera Gutierrez**  
-Estudiante de Ingeniería de Sistemas  
 Abril 2026

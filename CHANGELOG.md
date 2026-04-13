@@ -11,13 +11,31 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.2] — 2026-04-13
+
+### Changed
+- `README.md` — eliminación de todos los em-dash (`—`) del documento; reemplazados
+  por `:`, `,` o `.` según contexto para un tono más natural.
+- `README.md` — descripciones de Página 2 y Página 3 del dashboard corregidas
+  para coincidir con lo que realmente muestran los screenshots (SUMA DE SALE_ID,
+  SUMA DE CUSTOMER_ID).
+- `README.md` — caption de Fase 3 Silver actualizado (ya no dice "estado EXITOSO").
+- `README.md` — firma final simplificada, sin "Estudiante de Ingeniería de Sistemas".
+
+### Removed
+- `REVISION_FINAL.md` — documento de auditoría interna eliminado.
+- `.gitignore` — secciones innecesarias removidas (PDFs, screenshots/,
+  documentos locales de prueba).
+
+---
+
 ## [1.2.0] — 2026-04-13
 
 ### Added
 - 3 capturas de pantalla del dashboard Power BI organizadas en `docs/`:
   `20-dashboard-ventas-por-año.png`, `21-dashboard-top-productos.png`,
   `22-dashboard-segmentos-rfm.png`.
-- Sección completa "Dashboard Power BI (extra — no solicitado)" en `README.md`:
+- Sección completa "Dashboard Power BI (extra, no solicitado)" en `README.md`:
   justificación transparente, 3 páginas documentadas con capturas embebidas,
   admisión honesta de experiencia limitada con Power BI.
 
