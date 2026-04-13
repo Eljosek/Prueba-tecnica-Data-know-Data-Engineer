@@ -349,7 +349,35 @@ python orchestration/pipeline_orchestrator.py
 
 ---
 
-*Ultima actualizacion: 12 de abril de 2026*
+*Ultima actualizacion: 13 de abril de 2026*
+
+---
+
+## Capturas de Pantalla
+
+Todas las evidencias del proyecto se encuentran en `docs/`:
+
+| # | Archivo | Descripcion |
+|---|---|---|
+| 01 | `01-fase1-generacion-datos.png` | Generacion de datos sinteticos |
+| 02 | `02-fase1-output-files.png` | Archivos de salida generados |
+| 03 | `03-fase1-sql-verification.png` | Verificacion SQL local |
+| 04 | `04-fase1-sql-verification-azure.png` | Verificacion SQL en Azure |
+| 05 | `05-fase2-resource-visualizer.png` | Visualizador de recursos Azure |
+| 06 | `06-fase3-gold-views.png` | 8 vistas Gold en SQL |
+| 07 | `07-fase1-dataset-overview.png` | Overview del dataset completo |
+| 08 | `08-fase3-kpi-ejecutivo.png` | Vista kpi_ejecutivo |
+| 09 | `09-fase3-dim-productos.png` | Vista dim_productos |
+| 10 | `10-fase4-dataflows-16.png` | 16 Mapping Data Flows en ADF |
+| 11 | `11-fase3-pipeline-medallion.png` | Pipeline Medallion ETL |
+| 12 | `12-fase4-tablas-tracking.png` | Tablas de tracking SQL |
+| 13 | `13-fase4-pipeline-runs.png` | Ejecuciones de pipeline (todas Correcto) |
+| 14 | `14-fase5-alert-failed-email.png` | Email de alerta: pipeline failed |
+| 15 | `15-fase5-alert-succeeded-email.png` | Email de alerta: pipeline succeeded |
+| 16 | `16-fase5-alertas-monitor.png` | 3 reglas de alerta en Azure Monitor |
+| 17 | `17-fase5-rbac-roles-gold.png` | Roles RBAC en contenedor gold (3 grupos) |
+| 18 | `18-fase4-quality-report-sql.png` | Quality report en SQL |
+| 19 | `19-fase5-quality-tests-5de5.png` | 5/5 pruebas de calidad pasadas |
 
 ---
 

@@ -11,6 +11,28 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.2] — 2026-04-13
+
+### Removed
+- 6 archivos `.gitkeep` en directorios que ya contienen archivos reales
+  (`data-generation/`, `docs/`, `orchestration/`, `pipelines/bronze/`,
+  `pipelines/gold/`, `pipelines/silver/`).
+- `infra/FASE_2_PASOS_EJECUCION.md` — notas internas de desarrollo.
+- `infra/backend.tf` — archivo de comentarios redundante; la configuracion
+  del backend remoto esta en `providers.tf`.
+- 3 screenshots redundantes/duplicados de `docs/`.
+
+### Added
+- 7 capturas de pantalla organizadas con nomenclatura profesional (13–19):
+  pipeline runs, alertas por email, 3 reglas de alerta en Azure Monitor,
+  roles RBAC en contenedor gold, quality report SQL, y 5/5 pruebas de calidad.
+- Seccion "Capturas de Pantalla" en `README.md` con tabla completa de 19 evidencias.
+
+### Changed
+- `README.md` — fecha de ultima actualizacion a 13 de abril de 2026.
+
+---
+
 ## [1.0.1] — 2026-04-13
 
 ### Changed
