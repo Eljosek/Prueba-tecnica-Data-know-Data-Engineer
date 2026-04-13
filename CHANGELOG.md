@@ -11,6 +11,19 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.0] — 2026-04-13
+
+### Fixed
+- `orchestration/deploy_adf_pipelines.py` — retry policy de todos los pipelines actualizada
+  de 1–2 a 3 reintentos, alineada con la definicion IaC (`infra/adf_pipelines.tf`).
+- RBAC: creados 6 role assignments en Azure (Ingeniero: Blob Contributor×3 + SQL Contributor,
+  Analista: Blob Reader gold, Administrador: Owner RG). Verificados en cada scope.
+- ADF Linked Services: corregido LS_DataLake_RetailMax a Managed Identity y
+  LS_AzureSQL_RetailMax a connection string explicito (resuelve error 403 en pipelines).
+- `PL_Orquestador_Maestro` ejecutado exitosamente end-to-end (Bronze → Silver → Gold → Calidad).
+
+---
+
 ## [0.9.0] — 2026-04-12
 
 ### Added

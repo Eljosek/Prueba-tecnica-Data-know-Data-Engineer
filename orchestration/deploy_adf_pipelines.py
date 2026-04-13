@@ -221,7 +221,7 @@ def main():
                             "dependsOn": [],
                             "policy": {
                                 "timeout": "0.01:00:00",
-                                "retry": 2,
+                                "retry": 3,
                                 "retryIntervalInSeconds": 30,
                             },
                             "userProperties": [],
@@ -311,7 +311,7 @@ def main():
                             "dependsOn": [],
                             "policy": {
                                 "timeout": "0.01:00:00",
-                                "retry": 2,
+                                "retry": 3,
                                 "retryIntervalInSeconds": 30,
                             },
                             "userProperties": [],
@@ -379,7 +379,7 @@ def main():
                 ],
                 "policy": {
                     "timeout": "0.00:10:00",
-                    "retry": 1,
+                    "retry": 3,
                     "retryIntervalInSeconds": 30,
                 },
                 "userProperties": [],
@@ -417,7 +417,7 @@ def main():
                 "dependsOn": [],
                 "policy": {
                     "timeout": "0.00:10:00",
-                    "retry": 1,
+                    "retry": 3,
                     "retryIntervalInSeconds": 30,
                 },
                 "userProperties": [],
@@ -442,7 +442,7 @@ def main():
                 ],
                 "policy": {
                     "timeout": "0.00:10:00",
-                    "retry": 1,
+                    "retry": 3,
                     "retryIntervalInSeconds": 30,
                 },
                 "userProperties": [],
@@ -480,7 +480,7 @@ def main():
                             "dependsOn": [],
                             "policy": {
                                 "timeout": "0.01:00:00",
-                                "retry": 2,
+                                "retry": 3,
                                 "retryIntervalInSeconds": 30,
                             },
                             "userProperties": [],
@@ -555,7 +555,7 @@ def main():
                 "dependsOn": [],
                 "policy": {
                     "timeout": "0.00:10:00",
-                    "retry": 1,
+                    "retry": 3,
                     "retryIntervalInSeconds": 30,
                 },
                 "userProperties": [],
@@ -583,7 +583,7 @@ def main():
                 ],
                 "policy": {
                     "timeout": "0.00:10:00",
-                    "retry": 1,
+                    "retry": 3,
                     "retryIntervalInSeconds": 30,
                 },
                 "userProperties": [],

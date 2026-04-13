@@ -127,8 +127,9 @@ resource "azurerm_data_factory_pipeline" "ingesta_bronze" {
           "dependsOn": [],
           "policy": {
             "timeout": "0.01:00:00",
-            "retry": 2,
-            "retryIntervalInSeconds": 30
+            "retry": 3,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false
           },
           "userProperties": [],
           "typeProperties": {
@@ -221,8 +222,9 @@ resource "azurerm_data_factory_pipeline" "limpieza_silver" {
           "dependsOn": [],
           "policy": {
             "timeout": "0.01:00:00",
-            "retry": 2,
-            "retryIntervalInSeconds": 30
+            "retry": 3,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false
           },
           "userProperties": [],
           "typeProperties": {
@@ -291,7 +293,7 @@ resource "azurerm_data_factory_pipeline" "limpieza_silver" {
     ],
     "policy": {
       "timeout": "0.00:10:00",
-      "retry": 1,
+      "retry": 3,
       "retryIntervalInSeconds": 30
     },
     "userProperties": [],
@@ -332,7 +334,7 @@ resource "azurerm_data_factory_pipeline" "vistas_gold" {
     "dependsOn": [],
     "policy": {
       "timeout": "0.00:10:00",
-      "retry": 1,
+      "retry": 3,
       "retryIntervalInSeconds": 30
     },
     "userProperties": [],
@@ -370,7 +372,7 @@ resource "azurerm_data_factory_pipeline" "vistas_gold" {
     ],
     "policy": {
       "timeout": "0.00:10:00",
-      "retry": 1,
+      "retry": 3,
       "retryIntervalInSeconds": 30
     },
     "userProperties": [],
@@ -425,8 +427,9 @@ resource "azurerm_data_factory_pipeline" "vistas_gold" {
           "dependsOn": [],
           "policy": {
             "timeout": "0.01:00:00",
-            "retry": 2,
-            "retryIntervalInSeconds": 30
+            "retry": 3,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false
           },
           "userProperties": [],
           "typeProperties": {
@@ -505,7 +508,7 @@ resource "azurerm_data_factory_pipeline" "calidad_datos" {
     "dependsOn": [],
     "policy": {
       "timeout": "0.00:10:00",
-      "retry": 1,
+      "retry": 3,
       "retryIntervalInSeconds": 30
     },
     "userProperties": [],
@@ -535,7 +538,7 @@ resource "azurerm_data_factory_pipeline" "calidad_datos" {
     ],
     "policy": {
       "timeout": "0.00:10:00",
-      "retry": 1,
+      "retry": 3,
       "retryIntervalInSeconds": 30
     },
     "userProperties": [],
