@@ -1,337 +1,380 @@
-# Prueba Tecnica - Ingeniero de Datos
-### RetailMax · Escenario B – Retail y Comercio Electrónico
+<p align="center">
+  <img src="docs/logo2020_DataKnow-compressor.png" alt="DataKnow Logo" width="320"/>
+</p>
 
-> **Candidato:** Jose Miguel Herrera Gutierrez 
-> **Correo:** Josemiguelherreragutierrez7@gmail.com
-> **Fecha:** Abril 8, 2026  
-> **GitHub:** https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer
-> **LinkedIn:** https://www.linkedin.com/in/joseherreradev/
+# Prueba Tecnica — Ingeniero de Datos
+
+**Escenario B: RetailMax · Retail y Comercio Electronico**
+
+| | |
+|---|---|
+| **Candidato** | Jose Miguel Herrera Gutierrez |
+| **Correo** | Josemiguelherreragutierrez7@gmail.com |
+| **GitHub** | [Eljosek](https://github.com/Eljosek/Prueba-tecnica-Data-know-Data-Engineer) |
+| **LinkedIn** | [joseherreradev](https://www.linkedin.com/in/joseherreradev/) |
+| **Fecha de entrega** | 13 de abril de 2026 |
 
 ---
 
-## Saludo Cordial
+## Hola, equipo de DataKnow
 
-Agradezco sinceramente la oportunidad de participar en esta prueba técnica de **DataKnow**. Ha sido un verdadero honor trabajar en este desafío y demostrar mis habilidades como Ingeniero de Datos. Espero que este proyecto refleje mi dedicación, conocimiento técnico y pasión por la ingeniería de datos moderna. Saludos cordiales a quienes revisen este trabajo.
+Quiero empezar agradeciendo la oportunidad. Soy estudiante de Ingenieria de Sistemas y esta prueba fue, sin exagerar, el proyecto mas completo que he armado hasta ahora. Me obligo a salir de la zona comoda, conectar muchas piezas que solo habia visto en teoria y resolver problemas reales contra la nube.
 
-## Escenario Elegido: B - Retail y Comercio Electrónico
+Elegi el **Escenario B (RetailMax)** porque me parecio el mas tangible: ventas, inventarios, devoluciones... son datos que puedes visualizar mentalmente y eso me ayudaba a validar si los resultados tenian sentido o no. La logica de negocio tipo RFM, quiebres de stock y tasas de devolucion le daba peso analitico real.
 
-RetailMax es una cadena de retail que necesita optimizar su cadena de suministro mediante análisis de datos. Este escenario fue elegido porque:
-- Lógica de negocio clara y relatable
-- Datos reales de ventas, inventario y devoluciones
-- Aplicación práctica de RFM y análisis de quiebres de stock
+La plataforma es **Microsoft Azure** porque es la que mejor conozco como estudiante (tengo la suscripcion Azure for Students) y porque Data Factory + SQL Database + Storage Gen2 cubren todo el flujo de datos sin necesidad de recursos mas complejos como Databricks o Synapse.
 
-## Plataforma Elegida: Microsoft Azure
-
-Se seleccionó Azure porque:
-- **Data Lake Storage Gen2** para almacenamiento escalable
-- **Azure Data Factory** para orquestación nativa
-- **Azure SQL Database** para datos origen
-- **Terraform** para infraestructura como código (IaC)
-- Integración nativa con servicios Microsoft
+---
 
 ## Tabla de Contenido
 
-- [Arquitectura](#arquitectura)
-- [Recursos Azure](#recursos-azure)
-- [Fase 1 – Generacion de datos sinteticos](#fase-1--generacion-de-datos-sinteticos)
-- [Fase 2 – Infraestructura como Codigo](#fase-2--infraestructura-como-codigo)
-- [Fase 3 – Pipeline Medallion](#fase-3--pipeline-medallion)
-- [Fase 4 – Orquestacion ADF](#fase-4--orquestacion-adf)
-- [Fase 5 – Gobierno y Seguridad](#fase-5--gobierno-y-seguridad)
-- [Extras – CI/CD, Lineage y Monitoreo](#extras--cicd-lineage-y-monitoreo)
-- [Dashboard Power BI](#dashboard-power-bi)
-- [Reproduccion local](#reproduccion-local)
+- [Arquitectura general](#arquitectura-general)
+- [Recursos desplegados en Azure](#recursos-desplegados-en-azure)
+- [Fase 1 — Generacion de datos sinteticos](#fase-1--generacion-de-datos-sinteticos)
+- [Fase 2 — Infraestructura como Codigo (Terraform)](#fase-2--infraestructura-como-codigo-terraform)
+- [Fase 3 — Pipeline Medallion (Bronze → Silver → Gold)](#fase-3--pipeline-medallion-bronze--silver--gold)
+- [Fase 4 — Orquestacion con Azure Data Factory](#fase-4--orquestacion-con-azure-data-factory)
+- [Fase 5 — Gobierno, seguridad y calidad](#fase-5--gobierno-seguridad-y-calidad)
+- [Dashboard Power BI (extra)](#dashboard-power-bi-extra)
+- [Como reproducir este proyecto](#como-reproducir-este-proyecto)
+- [Reflexion personal y metodologia](#reflexion-personal-y-metodologia)
 
 ---
 
-## Arquitectura
+## Arquitectura general
+
+El flujo va desde Azure SQL Database (origen) hasta las vistas Gold en Storage, pasando por tres capas y un pipeline orquestador:
 
 ```
-Azure SQL Database (origen)
-        |
-        v
-[PL_Ingesta_Bronze]  -->  Storage: bronze/{tabla}/yyyy/MM/dd/{tabla}.parquet
-        |
-        v
-[PL_Limpieza_Silver] -->  Storage: silver/{tabla}/yyyy/MM/dd/{tabla}_clean.parquet
-        |
-        v
-[PL_Vistas_Gold]     -->  Storage: gold/{vista}/yyyy/MM/dd/{vista}.parquet
-        |
-        v
-[PL_Calidad_Datos]   -->  pipeline_quality_report + pipeline_errors (SQL)
-        ^
-        |
-[PL_Orquestador_Maestro]  <-- punto de entrada unico
+Azure SQL Database (7 tablas origen)
+        │
+        ▼
+ PL_Ingesta_Bronze  ──►  bronze/{tabla}/yyyy/MM/dd/{tabla}.parquet
+        │
+        ▼
+ PL_Limpieza_Silver ──►  silver/{tabla}/yyyy/MM/dd/{tabla}_clean.parquet
+        │
+        ▼
+ PL_Vistas_Gold     ──►  gold/{vista}/yyyy/MM/dd/{vista}.parquet
+        │
+        ▼
+ PL_Calidad_Datos   ──►  pipeline_quality_report + pipeline_errors (SQL)
+        ▲
+        │
+ PL_Orquestador_Maestro   ← punto de entrada unico (trigger diario 02:00 UTC)
 ```
 
-**Mapping Data Flows (16)**
+En ADF ademas se definieron **16 Mapping Data Flows** que implementan la logica de cada capa de forma visual:
+
 | Capa | Data Flows |
 |---|---|
-| Silver | DF_Silver_MSTR_ARTICULOS, DF_Silver_MSTR_TIENDAS, DF_Silver_MSTR_PROVEEDORES, DF_Silver_CRM_MIEMBROS, DF_Silver_TRANS_VENTAS, DF_Silver_INV_STOCK_DIARIO, DF_Silver_POST_DEVOLUCIONES |
-| Gold | DF_Gold_dim_productos, DF_Gold_dim_tiendas, DF_Gold_dim_clientes, DF_Gold_fact_ventas, DF_Gold_fact_inventario, DF_Gold_fact_devoluciones, DF_Gold_fact_rfm_clientes |
-| Calidad | DF_Silver_Quality_Report, DF_Quality_Checks |
+| Silver (7) | `DF_Silver_MSTR_ARTICULOS`, `DF_Silver_MSTR_TIENDAS`, `DF_Silver_MSTR_PROVEEDORES`, `DF_Silver_CRM_MIEMBROS`, `DF_Silver_TRANS_VENTAS`, `DF_Silver_INV_STOCK_DIARIO`, `DF_Silver_POST_DEVOLUCIONES` |
+| Gold (7) | `DF_Gold_dim_productos`, `DF_Gold_dim_tiendas`, `DF_Gold_dim_clientes`, `DF_Gold_fact_ventas`, `DF_Gold_fact_inventario`, `DF_Gold_fact_devoluciones`, `DF_Gold_fact_rfm_clientes` |
+| Calidad (2) | `DF_Silver_Quality_Report`, `DF_Quality_Checks` |
+
+<p align="center">
+  <img src="docs/10-fase4-dataflows-16.png" alt="16 Data Flows en ADF" width="700"/>
+  <br><em>Los 16 Data Flows desplegados en Azure Data Factory</em>
+</p>
 
 ---
 
-## Recursos Azure
+## Recursos desplegados en Azure
 
-| Recurso | Nombre | Descripcion |
+Todo vive en la region **Brazil South** dentro de un solo Resource Group:
+
+| Recurso | Nombre | Para que sirve |
 |---|---|---|
-| Resource Group | `rg-retailmax-brs-dev` | Contenedor de todos los recursos |
-| Storage Account | `stgretailmaxbrsdev` | Data Lake con capas bronze, silver, gold |
+| Resource Group | `rg-retailmax-brs-dev` | Agrupa todos los recursos del proyecto |
+| Storage Account (ADLS Gen2) | `stgretailmaxbrsdev` | Data Lake con contenedores bronze, silver, gold y tfstate |
 | Azure SQL Server | `sqlsrv-retailmax-brs-dev` | Motor de base de datos |
-| Azure SQL Database | `sqldb-retailmax-brs-dev` | 7 tablas fuente + tablas de tracking |
-| Key Vault | `kv-retailmax-brs-dev` | Gestion de secretos (SQL password, connection strings) |
-| Data Factory | `adf-retailmax-brs-dev` | 5 pipelines + 16 data flows |
-| Log Analytics | `log-retailmax-brs-dev` | Telemetria y diagnosticos |
+| Azure SQL Database | `sqldb-retailmax-brs-dev` | 7 tablas fuente + tablas de tracking/errores |
+| Key Vault | `kv-retailmax-brs-dev` | Secretos: password SQL, connection strings |
+| Data Factory | `adf-retailmax-brs-dev` | 5 pipelines, 16 data flows, trigger diario |
+| Log Analytics | `log-retailmax-brs-dev` | Telemetria y logs de diagnostico |
 | Application Insights | `ai-retailmax-brs-dev` | Monitoreo de la aplicacion |
 
+<p align="center">
+  <img src="docs/05-fase2-resource-visualizer.png" alt="Recursos Azure desplegados" width="700"/>
+  <br><em>Vista del Resource Visualizer en Azure Portal</em>
+</p>
+
 ---
 
-## Fase 1 – Generacion de datos sinteticos
+## Fase 1 — Generacion de datos sinteticos
 
-**Archivos:** `data-generation/`
+**Carpeta:** `data-generation/`
 
-Se generaron datos sinteticos realistas para 7 tablas del dominio retail:
+Genere datos sinteticos con `Faker` y `numpy` para 7 tablas del dominio retail. Los datos buscan ser realistas: precios coherentes, fechas dentro de rangos logicos, relaciones entre proveedores y articulos, etc.
 
-| Tabla | Filas | Descripcion |
+| Tabla | Filas | Que contiene |
 |---|---|---|
 | `MSTR_ARTICULOS` | 5 000 | Catalogo de productos con categoria y proveedor |
 | `MSTR_TIENDAS` | 200 | Tiendas con tipo, ciudad y metros cuadrados |
-| `MSTR_PROVEEDORES` | 500 | Proveedores con pais y tipo |
+| `MSTR_PROVEEDORES` | 500 | Proveedores con pais y calificacion |
 | `CRM_MIEMBROS` | 50 000 | Clientes con canal preferido y fecha de alta |
-| `TRANS_VENTAS` | 1 500 000 | Transacciones con descuento, precio y canal de venta |
+| `TRANS_VENTAS` | 1 500 000 | Transacciones: precio, descuento, canal |
 | `INV_STOCK_DIARIO` | 365 000 | Snapshots de stock fisico, transito y reservado |
 | `POST_DEVOLUCIONES` | 75 000 | Devoluciones con motivo, estado y canal |
 
-**Total: 1 795 700 filas cargadas a Azure SQL Database.**
-
-Herramientas usadas: `Faker`, `numpy`, `pyodbc`, `pandas`.
+**Total: ~1.8 millones de filas** cargadas a Azure SQL Database.
 
 ```bash
-python data-generation/generate_data.py
-python data-generation/load_to_sql.py
+python data-generation/generate_data.py   # genera CSVs locales
+python data-generation/load_to_sql.py     # carga a Azure SQL
 ```
 
+<p align="center">
+  <img src="docs/01-fase1-generacion-datos.png" alt="Generacion de datos" width="700"/>
+  <br><em>Ejecucion de generate_data.py — 7 tablas generadas</em>
+</p>
+
+<p align="center">
+  <img src="docs/04-fase1-sql-verification-azure.png" alt="Verificacion SQL Azure" width="700"/>
+  <br><em>Conteo de filas directamente en Azure SQL</em>
+</p>
+
+El diagrama ER del modelo esta documentado en [`docs/er_diagram.md`](docs/er_diagram.md) con diagrama Mermaid.
+
 ---
 
-## Fase 2 – Infraestructura como Codigo
+## Fase 2 — Infraestructura como Codigo (Terraform)
 
-**Archivos:** `infra/`
+**Carpeta:** `infra/`
 
-Todos los recursos Azure se definen en Terraform (`hashicorp/azurerm ~> 3.80`):
+Toda la infraestructura se define con Terraform (`azurerm ~> 3.80`). Nada se creo a mano en el portal salvo los grupos AAD para RBAC.
 
-| Archivo | Contenido |
+| Archivo | Que define |
 |---|---|
-| `main.tf` | SQL Server, Storage, Key Vault, ADF, Log Analytics, App Insights, roles RBAC |
-| `adf_pipelines.tf` | Linked services, datasets y 5 pipelines definidos como IaC |
-| `variables.tf` | Variables configurables (entorno, region, SKU) |
-| `locals.tf` | Nombres de recursos calculados con convencion Azure |
-| `outputs.tf` | Outputs de todos los recursos desplegados |
-| `providers.tf` | Proveedor azurerm con backend de estado remoto |
+| `main.tf` | SQL Server, Storage, Key Vault, ADF, Log Analytics, App Insights, alertas, diagnosticos, RBAC de ADF |
+| `adf_pipelines.tf` | Linked services, datasets y los 5 pipelines como IaC |
+| `variables.tf` | Variables configurables (entorno, region, SKU). Las sensibles marcadas con `sensitive = true` |
+| `locals.tf` | Nombres de recursos calculados con convencion `{recurso}-{proyecto}-{region}-{env}` |
+| `outputs.tf` | IDs y nombres de todos los recursos creados |
+| `providers.tf` | Proveedor azurerm + backend remoto en Storage Account |
 
-La infraestructura fue aplicada con `terraform apply`. El estado se almacena en `stgretailmaxbrsdev/tfstate/`.
+**Estado de Terraform:** almacenado remotamente en `stgretailmaxbrsdev/tfstate/terraform.tfstate` — no esta en git (`.gitignore` lo excluye).
+
+**Despliegue:**
+```bash
+cd infra
+terraform init
+terraform plan -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars"
+```
+
+> Las instrucciones completas de despliegue estan en `infra/` junto con los archivos de configuracion.
 
 ---
 
-## Fase 3 – Pipeline Medallion
+## Fase 3 — Pipeline Medallion (Bronze → Silver → Gold)
 
-**Archivos:** `pipelines/`
+**Carpeta:** `pipelines/`
 
-### Bronze
-`pipelines/bronze/ingestion.py`
+### Bronze — Ingesta cruda
 
-Ingesta desde Azure SQL hacia el contenedor `bronze` en formato Parquet. Agrega columnas de auditoria:
-- `batch_id`: UUID unico por ejecucion
-- `ingest_timestamp`: marca de tiempo UTC
-- `source_system`: nombre del servidor SQL origen
+`pipelines/bronze/ingestion.py` copia las 7 tablas de SQL a Parquet en el contenedor `bronze`. Agrega columnas de auditoria: `batch_id` (UUID), `ingest_timestamp` (UTC) y `source_system`.
 
-### Silver
-`pipelines/silver/cleaning.py`
+### Silver — Limpieza y calidad
 
-Limpieza y deduplicacion con `SELECT DISTINCT`. Por cada tabla se registra en `pipeline_quality_report`:
-- filas leidas, filas limpias, duplicados detectados, nulos detectados
-- duracion en segundos y estado (`EXITOSO` / `CON_ERRORES`)
+`pipelines/silver/cleaning.py` aplica `SELECT DISTINCT` y registra metricas por tabla en `pipeline_quality_report`: filas leidas, filas limpias, duplicados detectados, nulos y duracion. Los errores individuales se guardan en `pipeline_errors`.
 
-Los errores de registro individual se almacenan en `pipeline_errors`.
+`pipelines/silver/export_quality_logs.py` exporta esos logs a `silver/logs/` en Storage.
 
-`pipelines/silver/export_quality_logs.py`: exporta los logs a `silver/logs/` en Storage.
+<p align="center">
+  <img src="docs/18-fase4-quality-report-sql.png" alt="Quality report en SQL" width="700"/>
+  <br><em>Reporte de calidad en pipeline_quality_report — todas las tablas con estado EXITOSO</em>
+</p>
 
-### Gold
-`pipelines/gold/views.sql`: 8 vistas SQL (DDL con `CREATE OR ALTER VIEW`):
+### Gold — Vistas de negocio
 
-| Vista | Tipo | Descripcion |
+`pipelines/gold/views.sql` define 8 vistas SQL con reglas de negocio reales:
+
+| Vista | Tipo | Logica principal |
 |---|---|---|
-| `dim_productos` | Dimension | JOIN con proveedores, `estimated_margin` (30%) |
-| `dim_tiendas` | Dimension | `zona_distribucion` calculada por `id_pais % 5` |
-| `dim_clientes` | Dimension | Género estandarizado, `age_range` imputado con moda, `antiguedad_dias` |
-| `fact_ventas` | Hecho | `COALESCE` para anónimos, `gross/net_amount`, `ind_con_descuento` |
-| `fact_inventario` | Hecho | CTE ventas 14d, `avg_daily_sales_14d`, `cobertura_dias`, `alerta_quiebre` |
-| `fact_devoluciones` | Hecho | `original_unit_price` por JOIN, `return_rate_by_product` por CTE |
-| `fact_rfm_clientes` | Hecho | RFM ventana 90 días, `NTILE(5)`, segmento R#-F#-M#, clasificación |
-| `kpi_ejecutivo` | KPI | Agregación diaria por fecha/país/canal: transacciones, clientes, ventas brutas/netas |
+| `dim_productos` | Dimension | JOIN con proveedores, margen estimado al 30% |
+| `dim_tiendas` | Dimension | Zona de distribucion calculada |
+| `dim_clientes` | Dimension | Genero estandarizado, rango de edad imputado con moda, antiguedad en dias |
+| `fact_ventas` | Hecho | COALESCE para anonimos, monto bruto/neto, indicador de descuento |
+| `fact_inventario` | Hecho | Promedio ventas 14d, cobertura en dias, alerta de quiebre de stock |
+| `fact_devoluciones` | Hecho | Precio original por JOIN, tasa de devolucion por producto |
+| `fact_rfm_clientes` | Hecho | Modelo RFM a 90 dias con NTILE(5), segmento y clasificacion |
+| `kpi_ejecutivo` | KPI | Metricas agregadas por fecha/pais/canal |
 
-`pipelines/gold/export_to_storage.py`: exporta las 8 vistas como Parquet al contenedor `gold`.
+`pipelines/gold/export_to_storage.py` exporta las 8 vistas como Parquet al contenedor `gold`.
+
+<p align="center">
+  <img src="docs/06-fase3-gold-views.png" alt="Vistas Gold" width="700"/>
+  <br><em>Las 8 vistas Gold creadas en Azure SQL</em>
+</p>
+
+<p align="center">
+  <img src="docs/11-fase3-pipeline-medallion.png" alt="Pipeline Medallion" width="700"/>
+  <br><em>Pipeline Medallion: Bronze → Silver → Gold → Calidad</em>
+</p>
 
 ---
 
-## Fase 4 – Orquestacion ADF
+## Fase 4 — Orquestacion con Azure Data Factory
 
-**Archivos:** `orchestration/`
+**Carpeta:** `orchestration/`
 
-### Pipelines (5)
+### 5 Pipelines en ADF
 
-| Pipeline | Descripcion |
+| Pipeline | Que hace |
 |---|---|
-| `PL_Ingesta_Bronze` | ForEach con 4 actividades paralelas: copia 7 tablas SQL a Parquet bronze |
-| `PL_Limpieza_Silver` | ForEach: `SELECT DISTINCT` por tabla + registro de metricas de calidad |
-| `PL_Vistas_Gold` | `CREATE OR ALTER VIEW` x7 + ForEach export a Parquet gold |
-| `PL_Calidad_Datos` | Consulta `pipeline_quality_report` y `pipeline_errors` |
-| `PL_Orquestador_Maestro` | Ejecuta Bronze → Silver → Gold → Calidad en cadena |
+| `PL_Ingesta_Bronze` | ForEach paralelo: copia las 7 tablas SQL a Parquet en bronze |
+| `PL_Limpieza_Silver` | ForEach: SELECT DISTINCT + metricas de calidad por tabla |
+| `PL_Vistas_Gold` | Crea las 8 vistas + exporta a Parquet en gold |
+| `PL_Calidad_Datos` | Consulta quality report y errores |
+| `PL_Orquestador_Maestro` | Ejecuta Bronze → Silver → Gold → Calidad en secuencia |
 
-### Mapping Data Flows (16)
+**Configuracion:**
+- **Trigger diario** a las 02:00 AM UTC (`Trigger_Diario_0200`)
+- **3 reintentos** con backoff exponencial en caso de fallo
+- **Dependencias explicitas** entre etapas (cada pipeline espera al anterior)
 
-Cada Data Flow define la logica de transformacion visual en ADF:
-- **Silver (7):** filtro de nulos en clave primaria + columnas de auditoria `silver_ingest_ts`, `silver_source`
-- **Gold (7):** lectura desde vistas SQL + columna de auditoria `gold_ingest_ts`
-- **Calidad (2):** `DF_Silver_Quality_Report` (agregacion de metricas) y `DF_Quality_Checks` (resumen de errores)
-
-### Despliegue
-
-Los pipelines y data flows se desplegaron via SDK de Python (`azure-mgmt-datafactory`) dado que Terraform CLI no estaba disponible en el entorno de desarrollo:
+Los pipelines se desplegaron via Python SDK (`azure-mgmt-datafactory`) porque en mi entorno de desarrollo no tenia Terraform CLI completo. El script `orchestration/deploy_adf_pipelines.py` crea linked services, datasets, los 5 pipelines y el trigger.
 
 ```bash
-# Variables de entorno requeridas
-$env:SQLSERVER_PASSWORD="..."
-$env:AZURE_STORAGE_CONNECTION_STRING="..."
-
-# Desplegar pipelines, linked services y datasets
-python orchestration/deploy_adf_pipelines.py
-
-# Desplegar data flows y corregir queries
-python orchestration/deploy_adf_dataflows.py
+python orchestration/deploy_adf_pipelines.py    # pipelines + trigger
+python orchestration/deploy_adf_dataflows.py     # 16 data flows
 ```
 
-### Orquestador Python local
+Tambien existe `orchestration/pipeline_orchestrator.py` como alternativa local que ejecuta Bronze → Silver → Gold sin depender de ADF.
 
-`orchestration/pipeline_orchestrator.py`: alternativa local que ejecuta Bronze → Silver → Gold secuencialmente con logging detallado, sin dependencia de ADF.
+<p align="center">
+  <img src="docs/13-fase4-pipeline-runs.png" alt="Pipeline runs exitosos" width="700"/>
+  <br><em>Todas las ejecuciones del orquestador con estado "Correcto"</em>
+</p>
 
 ---
 
-## Fase 5 – Gobierno y Seguridad
+## Fase 5 — Gobierno, seguridad y calidad
 
-### Gestion de Secretos
-- **Key Vault** (`kv-retailmax-brs-dev`): toda credencial (SQL password, connection strings) se almacena como secreto. Ningun script contiene credenciales en texto plano; se leen de variables de entorno en ejecucion local y de Key Vault en ADF.
-- **Sin secretos en git**: `.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform se almacena en Storage Account remoto.
+### Gestion de secretos
 
-### Managed Identity y RBAC
-- **Managed Identity**: ADF usa identidad `SystemAssigned` con acceso `Get`/`List` a Key Vault y rol `Storage Blob Data Contributor` en Storage.
-- **3 roles RBAC** definidos en `orchestration/deploy_rbac.py`:
+**Key Vault** (`kv-retailmax-brs-dev`) almacena toda credencial sensible: password de SQL y connection strings. Ningun script tiene credenciales en texto plano — se leen de variables de entorno localmente y de Key Vault en ADF.
 
-| Rol | Permisos Storage | Permisos SQL | Scope |
+`.gitignore` excluye `*.tfstate`, `*.tfvars`, `.env` y archivos de credenciales. El estado de Terraform esta en Storage remoto, no en el repositorio.
+
+### RBAC — 3 roles implementados
+
+Se crearon 3 grupos en Azure Active Directory y se asignaron roles con `orchestration/deploy_rbac.py`:
+
+| Rol | Storage | SQL | Scope |
 |---|---|---|---|
-| Ingeniero de Datos | `Blob Data Contributor` (bronze/silver/gold) | `Contributor` | Por contenedor |
-| Analista de Datos | `Blob Data Reader` (solo gold) | `Reader` | Solo gold |
+| Ingeniero de Datos | `Blob Data Contributor` en bronze/silver/gold | `Contributor` | Por contenedor |
+| Analista de Datos | `Blob Data Reader` solo en gold | `Reader` | Solo lectura gold |
 | Administrador | `Owner` | `Owner` | Resource Group completo |
 
-### Alertas (Azure Monitor)
-Definidas en `infra/main.tf` con Action Group para notificacion por correo:
+El Analista no tiene acceso a bronze ni silver — solo puede leer gold. Esto asegura que los datos crudos y en proceso queden protegidos.
 
-| Alerta | Severidad | Descripcion |
+<p align="center">
+  <img src="docs/17-fase5-rbac-roles-gold.png" alt="RBAC roles" width="700"/>
+  <br><em>Roles RBAC asignados a los 3 grupos AAD en el contenedor gold</em>
+</p>
+
+### Alertas — Azure Monitor
+
+Tres reglas de alerta definidas en Terraform (`infra/main.tf`) con Action Group para notificacion por correo:
+
+| Alerta | Severidad | Que detecta |
 |---|---|---|
-| `alert-adf-pipeline-failed` | 1 (Critica) | Notifica cuando un pipeline de ADF falla |
-| `alert-adf-pipeline-succeeded` | 3 (Info) | Reporte diario: confirma ejecucion exitosa |
-| `alert-volume-anomaly` | 2 (Warning) | Detecta cuando no hay ejecuciones de Bronze en 24h |
+| `alert-adf-pipeline-failed` | 1 (Critica) | Un pipeline de ADF fallo |
+| `alert-adf-pipeline-succeeded` | 3 (Info) | Reporte diario de ejecucion exitosa |
+| `alert-volume-anomaly` | 2 (Warning) | No hubo ejecuciones de Bronze en 24h |
 
-### Diagnosticos
-- SQL Server y ADF envian logs a Log Analytics Workspace con categorias `PipelineRuns`, `ActivityRuns`, `TriggerRuns`.
-- Application Insights disponible para monitoreo de la aplicacion.
+<p align="center">
+  <img src="docs/16-fase5-alertas-monitor.png" alt="Alertas Monitor" width="500"/>
+  <br><em>Las 3 reglas de alerta activas en Azure Monitor</em>
+</p>
 
-### Catalogo de Datos
-`docs/data_catalog.md`: catalogo completo con una seccion por tabla (Bronze) y por vista (Gold). Documenta nombre de campo, tipo, origen, si es calculado, PII y regla de negocio.
+<p align="center">
+  <img src="docs/14-fase5-alert-failed-email.png" alt="Email alerta fallo" width="500"/>
+  <img src="docs/15-fase5-alert-succeeded-email.png" alt="Email alerta exito" width="500"/>
+  <br><em>Emails recibidos: alerta de fallo (izq.) y confirmacion de exito (der.)</em>
+</p>
 
-### Linaje de Datos
-`docs/data_lineage.md`: diagrama Mermaid con el flujo completo de datos desde origen SQL hasta las 8 vistas Gold, incluyendo detalle de campos calculados y reglas de negocio por vista.
+### Diagnosticos y monitoreo
 
-### Pruebas de Calidad
-`pipelines/tests/quality_tests.py`: 5 pruebas automatizadas contra las vistas Gold:
-1. PKs sin nulos en todas las vistas
-2. Sin fechas futuras en tablas de hechos
-3. `cobertura_dias` y `physical_stock` no negativos
-4. `rfm_segment` con patron R#-F#-M# y clasificacion sin nulos
+- ADF envia logs de `PipelineRuns`, `ActivityRuns` y `TriggerRuns` a Log Analytics
+- Application Insights disponible para monitoreo adicional
+- Las tablas `pipeline_quality_report` y `pipeline_errors` en SQL sirven como log de auditoria de cada ejecucion
+
+### Catalogo de datos
+
+[`docs/data_catalog.md`](docs/data_catalog.md) documenta cada tabla Bronze y cada vista Gold con: nombre de campo, tipo, origen, si es calculado, si contiene PII y la regla de negocio aplicada.
+
+### Linaje de datos
+
+[`docs/data_lineage.md`](docs/data_lineage.md) tiene diagramas Mermaid con el flujo completo: desde las 7 tablas SQL de origen hasta las 8 vistas Gold, incluyendo campos calculados y reglas de transformacion por vista.
+
+### Pruebas de calidad — 5/5 pasadas
+
+`pipelines/tests/quality_tests.py` ejecuta 5 pruebas automatizadas contra las vistas Gold:
+
+1. PKs sin nulos en todas las vistas (dim + fact + kpi)
+2. Sin fechas futuras en fact_ventas, fact_inventario, fact_devoluciones
+3. `cobertura_dias` y `physical_stock` no negativos en fact_inventario
+4. `rfm_segment` con patron `Rx-Fy-Mz` y `rfm_classification` sin nulos
 5. `net_amount >= 0` en todas las ventas
 
----
-
-## Extras – CI/CD, Lineage y Monitoreo
-
-### CI/CD con GitHub Actions
-`.github/workflows/ci.yml`: pipeline de integracion continua que se ejecuta en cada push/PR a `main`:
-- **Python Lint**: valida estilo de codigo con `flake8` (max 120 caracteres)
-- **Quality Tests**: ejecuta las 5 pruebas de calidad contra Azure SQL
-- **Terraform Validate**: valida sintaxis y formato de la infraestructura IaC
-
-### Linaje de Datos
-`docs/data_lineage.md`: documentacion completa del flujo de datos con diagramas Mermaid:
-- Flujo general: Origen → Bronze → Silver → Gold (por tabla y vista)
-- Detalle por vista Gold: campos calculados, tablas origen, reglas de negocio
-- Cadena de orquestacion: Trigger → Maestro → Bronze → Silver → Gold → Calidad
-
-### Monitoreo y Alertas
-- **Action Group**: notificacion por correo configurada en Terraform
-- **3 alertas**: fallo de pipeline (Sev 1), exito diario (Sev 3), anomalia de volumen (Sev 2)
-- **Diagnosticos ADF**: logs de PipelineRuns, ActivityRuns y TriggerRuns a Log Analytics
+<p align="center">
+  <img src="docs/19-fase5-quality-tests-5de5.png" alt="5 de 5 tests pasados" width="700"/>
+  <br><em>Las 5 pruebas de calidad ejecutadas — todas pasaron</em>
+</p>
 
 ---
 
-## Dashboard Power BI
+## Dashboard Power BI (extra)
 
-Se incluye un dashboard de visualizacion con **Power BI Desktop** (gratuito) conectado
-directamente a las 8 vistas Gold de Azure SQL.
+Arme un dashboard en **Power BI Desktop** (gratuito) conectado a las 8 vistas Gold de Azure SQL. No es un entregable obligatorio pero sirve para visualizar que los datos Gold realmente tienen sentido.
 
-### Paginas del dashboard
-
-| Pagina | Contenido |
+| Pagina | Que muestra |
 |---|---|
-| **Resumen Ejecutivo** | KPIs diarios: ventas netas, transacciones, clientes unicos, ticket promedio (desde `kpi_ejecutivo`) |
-| **Analisis de Ventas** | Ventas por canal, pais y categoria. Top 10 productos. Segmentacion con/sin descuento |
-| **Inventario** | Productos con alerta de quiebre, cobertura promedio, stock disponible vs reservado |
-| **Devoluciones** | Tasa de devolucion por producto, motivos principales, tendencia mensual |
-| **Clientes RFM** | Segmentos Champions / Loyal / At\_Risk, clientes activos vs inactivos 90d |
+| Resumen Ejecutivo | KPIs diarios: ventas netas, transacciones, clientes, ticket promedio |
+| Analisis de Ventas | Ventas por canal, pais, categoria. Top 10 productos |
+| Inventario | Alertas de quiebre, cobertura promedio, stock disponible vs reservado |
+| Devoluciones | Tasa por producto, motivos principales, tendencia mensual |
+| Clientes RFM | Segmentos Champions / Loyal / At Risk, activos vs inactivos 90d |
 
-### Archivos de referencia
-
-- `dashboards/README.md`: guia completa de conexion, modelo de datos y relaciones
-- `dashboards/dax_measures.md`: medidas DAX (ventas, inventario, devoluciones, RFM, KPIs)
+Archivos: `dashboards/README.md` (guia de conexion) y `dashboards/dax_measures.md` (medidas DAX).
 
 ---
 
-## Reproduccion local
+## Como reproducir este proyecto
 
-### Requisitos
-- Python 3.x con paquetes: `pyodbc`, `pandas`, `azure-storage-blob`, `pyarrow`, `faker`, `numpy`, `azure-identity`, `azure-mgmt-datafactory`
-- Acceso a suscripcion Azure con los recursos desplegados
-- ODBC Driver para SQL Server
+### Requisitos previos
+
+- Python 3.10+ con: `pyodbc`, `pandas`, `azure-storage-blob`, `pyarrow`, `faker`, `numpy`, `azure-identity`, `azure-mgmt-datafactory`
+- Terraform >= 1.5
+- Suscripcion Azure con los recursos desplegados (o desplegar con `terraform apply`)
+- ODBC Driver 17 o 18 para SQL Server
 
 ### Variables de entorno
 
 ```powershell
-$env:SQLSERVER_HOST   = "sqlsrv-retailmax-brs-dev.database.windows.net"
-$env:SQLSERVER_DB     = "sqldb-retailmax-brs-dev"
-$env:SQLSERVER_USER   = "sqladmin"
-$env:SQLSERVER_PASSWORD = "<password>"
-$env:AZURE_STORAGE_CONNECTION_STRING = "<connection_string>"
+$env:SQLSERVER_HOST            = "sqlsrv-retailmax-brs-dev.database.windows.net"
+$env:SQLSERVER_DB              = "sqldb-retailmax-brs-dev"
+$env:SQLSERVER_USER            = "sqladmin"
+$env:SQLSERVER_PASSWORD        = "<tu-password>"
+$env:AZURE_STORAGE_CONNECTION_STRING = "<tu-connection-string>"
 ```
 
-### Orden de ejecucion
+### Paso a paso
 
 ```bash
-# Fase 1: generar y cargar datos
+# 1. Infraestructura
+cd infra
+terraform init
+terraform apply -var-file="terraform.tfvars"
+
+# 2. Generar y cargar datos
 python data-generation/generate_data.py
 python data-generation/load_to_sql.py
 
-# Fase 3: ejecutar pipeline medallion local
+# 3. Pipeline Medallion (local)
 python pipelines/bronze/ingestion.py
 python pipelines/silver/cleaning.py
 python pipelines/silver/export_quality_logs.py
@@ -339,50 +382,49 @@ python pipelines/gold/create_views.py
 python pipelines/gold/export_to_storage.py
 python pipelines/upload_to_storage.py
 
-# Fase 4 opcion A: desplegar ADF (requiere credenciales Azure)
+# 4. Desplegar ADF (opcional — requiere credenciales Azure)
 python orchestration/deploy_adf_pipelines.py
 python orchestration/deploy_adf_dataflows.py
 
-# Fase 4 opcion B: orquestador Python local
-python orchestration/pipeline_orchestrator.py
+# 5. Pruebas de calidad
+python pipelines/tests/quality_tests.py
 ```
 
 ---
 
-*Ultima actualizacion: 13 de abril de 2026*
+## Reflexion personal y metodologia
+
+### Lo dificil (siendo honesto)
+
+Este proyecto me tomo varios dias y hubo momentos en los que me senti bastante perdido. Quiero ser transparente sobre las partes que mas me costaron porque creo que eso tambien dice algo sobre el proceso de aprendizaje:
+
+- **La arquitectura Medallion:** Entender bien la separacion Bronze/Silver/Gold no fue trivial. Al principio queria meter toda la logica en una sola etapa y me di cuenta de que asi se pierde la trazabilidad. Separar responsabilidades (ingesta cruda, limpieza, vistas de negocio) fue un antes y despues.
+
+- **Azure Data Factory:** La conexion entre ADF y los demas servicios me dio muchos dolores de cabeza. El error 403 del MSI contra Storage me tuvo horas dandole vueltas hasta que entendi que necesitaba asignar `Storage Blob Data Contributor` a la identidad administrada. Tampoco fue facil crear los pipelines y data flows por SDK — la documentacion de `azure-mgmt-datafactory` es bastante escasa.
+
+- **Los Data Flows visuales:** Definir 16 data flows programaticamente (no desde el portal) fue un reto. Cada uno tiene su propio DSL y cualquier error de sintaxis hace que ADF lo rechace sin un mensaje claro. Fue mucho prueba y error.
+
+- **Terraform y el estado remoto:** Configurar el backend remoto en Storage fue sencillo en teoria, pero en la practica tuve que crear el contenedor `tfstate` antes de poder iniciar. Ese tipo de dependencias circulares (necesitas el recurso que aun no existe para guardarlo) me confundio al inicio.
+
+- **Las pruebas de calidad:** Disenar tests que fueran significativos y no solo "la tabla tiene filas" requirio pensar bien que podia salir mal: fechas futuras, nulos en PKs, valores negativos donde no deberia haberlos.
+
+### Metodologia Agile Analytics
+
+Algo que note al investigar sobre DataKnow es su enfoque de **Agile Analytics**: ciclos cortos de Entender → Arquitectura → Adopcion → Soporte, con iteraciones tipo Scrum (Planning → Daily → Review → Retrospectiva). Aunque trabaje solo en este proyecto, intente seguir un patron similar:
+
+1. **Entender** — Primero lei todo el documento de la prueba, entendi cada fase y arme un plan mental de que necesitaba.
+2. **Arquitectura** — Defini la infraestructura con Terraform antes de escribir los scripts de datos. Primero el esqueleto, luego la carne.
+3. **Adopcion** — Fui implementando fase por fase, verificando cada una antes de pasar a la siguiente. No intente hacer todo de golpe.
+4. **Soporte** — Al final agregue alertas, monitoreo y pruebas de calidad para que el pipeline se pueda mantener en el tiempo.
+
+Cada commit en el `CHANGELOG.md` refleja una iteracion real del proyecto. No es un commit gigante al final — fui construyendo incrementalmente, y cuando algo se rompia, lo arreglaba y seguia.
+
+### Lo que me llevo
+
+Mas alla de la prueba tecnica, este proyecto me dejo claro que la ingenieria de datos no es solo hacer queries o mover archivos. Es disenar sistemas que sean reproducibles, auditables y que alguien mas pueda entender. Ese cambio de mentalidad fue lo mas valioso.
 
 ---
 
-## Capturas de Pantalla
-
-Todas las evidencias del proyecto se encuentran en `docs/`:
-
-| # | Archivo | Descripcion |
-|---|---|---|
-| 01 | `01-fase1-generacion-datos.png` | Generacion de datos sinteticos |
-| 02 | `02-fase1-output-files.png` | Archivos de salida generados |
-| 03 | `03-fase1-sql-verification.png` | Verificacion SQL local |
-| 04 | `04-fase1-sql-verification-azure.png` | Verificacion SQL en Azure |
-| 05 | `05-fase2-resource-visualizer.png` | Visualizador de recursos Azure |
-| 06 | `06-fase3-gold-views.png` | 8 vistas Gold en SQL |
-| 07 | `07-fase1-dataset-overview.png` | Overview del dataset completo |
-| 08 | `08-fase3-kpi-ejecutivo.png` | Vista kpi_ejecutivo |
-| 09 | `09-fase3-dim-productos.png` | Vista dim_productos |
-| 10 | `10-fase4-dataflows-16.png` | 16 Mapping Data Flows en ADF |
-| 11 | `11-fase3-pipeline-medallion.png` | Pipeline Medallion ETL |
-| 12 | `12-fase4-tablas-tracking.png` | Tablas de tracking SQL |
-| 13 | `13-fase4-pipeline-runs.png` | Ejecuciones de pipeline (todas Correcto) |
-| 14 | `14-fase5-alert-failed-email.png` | Email de alerta: pipeline failed |
-| 15 | `15-fase5-alert-succeeded-email.png` | Email de alerta: pipeline succeeded |
-| 16 | `16-fase5-alertas-monitor.png` | 3 reglas de alerta en Azure Monitor |
-| 17 | `17-fase5-rbac-roles-gold.png` | Roles RBAC en contenedor gold (3 grupos) |
-| 18 | `18-fase4-quality-report-sql.png` | Quality report en SQL |
-| 19 | `19-fase5-quality-tests-5de5.png` | 5/5 pruebas de calidad pasadas |
-
----
-
-## Cierre
-
-Gracias nuevamente por revisar este proyecto. Quedo atento a cualquier pregunta, sugerencia o feedback.
-
-**Jose Miguel Herrera Gutierrez**
+**Jose Miguel Herrera Gutierrez**  
+Estudiante de Ingenieria de Sistemas  
+Abril 2026

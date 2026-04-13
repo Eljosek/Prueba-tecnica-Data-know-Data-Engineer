@@ -11,6 +11,29 @@ and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.0] — 2026-04-13
+
+### Removed
+- `.github/workflows/ci.yml` — CI/CD no es un entregable obligatorio de la prueba;
+  se elimina para mantener el repositorio limpio.
+- `.flake8` — archivo de configuracion asociado al workflow de CI eliminado.
+
+### Changed
+- `README.md` — reescritura completa:
+  - Logo de DataKnow al inicio del documento.
+  - Tono natural y personal (no generado por IA).
+  - Capturas de pantalla embebidas en cada fase con contexto.
+  - Seccion de reflexion personal: dificultades reales del proyecto
+    (Medallion, ADF, Data Flows, Terraform, pruebas de calidad).
+  - Referencia a la metodologia Agile Analytics de DataKnow.
+  - Justificacion de escenario y plataforma al inicio.
+  - Instrucciones de reproduccion mas claras (paso a paso).
+
+### Added
+- `docs/logo2020_DataKnow-compressor.png` — logo de DataKnow incluido en el README.
+
+---
+
 ## [1.0.2] — 2026-04-13
 
 ### Removed
